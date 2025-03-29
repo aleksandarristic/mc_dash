@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Minecraft Server{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>🟢 Server Status</h2>
+        <p>Status: <strong class="{{ 'text-success' if server_status == 'Online' else 'text-danger' }}">{{ server_status }}</strong></p>
+        <p>Players Online: <strong>{{ players_online }}</strong> / {{ max_players }}</p>
+    </div>
+    <div class="col-md-6">
+        <h2>ℹ️ Server Info</h2>
+        <ul class="list-group">
+            <li class="list-group-item position-relative">
+                IP: 
+                <button 
+                    class="btn btn-sm btn-outline-secondary ms-2 copy-btn" 
+                    onclick="copyToClipboard('{{ server_info.ip }}', this)"
+                    title="Click to copy"
+                >
+                    {{ server_info.ip }}
+                </button>
+                <span class="copied-badge badge bg-success position-absolute top-0 start-100 translate-middle visually-hidden">
+                    Copied!
+                </span>
+            </li>
+                                    <li class="list-group-item">Version: <strong>{{ server_info.version }}</strong></li>
+            <li class="list-group-item">MOTD: <em>{{ server_info.motd }}</em></li>
+        </ul>
+    </div>
+</div>
+
+<div class="mb-4">
+    <h2>📦 Downloads</h2>
+    <ul class="list-group">
+        {% for file in downloads %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ file }}
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('static', path='downloads/' ~ file) }}" download>Download</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<h2 class="mt-5">🔗 Linkovi</h2>
+<ul class="list-group">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        Download TLauncher
+        <a href="https://tlauncher.org/en/" target="_blank" class="btn btn-sm btn-outline-secondary">Go</a>
+    </li>
+</ul>
+<script>
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(function() {
+            const badge = button.parentElement.querySelector('.copied-badge');
+            badge.classList.remove("visually-hidden");
+            badge.classList.add("show");
+    
+            setTimeout(() => {
+                badge.classList.add("visually-hidden");
+                badge.classList.remove("show");
+            }, 1500);
+        }, function(err) {
+            console.error('Failed to copy', err);
+        });
+    }
+    </script>
+    
+{% endblock %}
