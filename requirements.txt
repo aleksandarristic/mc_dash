@@ -6,5 +6,4 @@ aiofiles
 python-multipart
 ipython
 nest_asyncio
-cachetools
 mcrcon
