@@ -2,9 +2,10 @@ import asyncio
 import sys
 
 import uvicorn
-from tortoise import Tortoise
+from tortoise import Tortoise, run_async
 
-from app import models, config
+from app import config, models
+from app.cache import poll_and_cache
 from app.db import generate_schema, init_db
 
 
@@ -89,7 +90,12 @@ async def check_models():
     print("Discovered models:", list(Tortoise.apps.get("models").keys()))
 
 
-# --- CLI Entry Point ---
+async def fetch_status():
+    await setup_tortoise_if_needed()
+    await poll_and_cache()
+    print("✅ Status snapshot saved.")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else None
     args = sys.argv[2:]
@@ -110,6 +116,9 @@ if __name__ == "__main__":
     elif cmd == "runserver":
         uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
 
+    elif cmd == "fetchstatus":
+        run_async(fetch_status())
+
     elif cmd == "checkmodels":
         asyncio.run(check_models())
 
@@ -120,6 +129,7 @@ Commands:
   initdb           Create tables (if not exist)
   migrate          Sync schema without data loss
   resetdb          Drop and recreate all tables
+  fetchstatus      Fetch and save server status
   shell [--initdb] Start interactive IPython shell
   runserver        Run FastAPI app (localhost:8000)
 """)

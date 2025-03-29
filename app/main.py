@@ -1,8 +1,11 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from tortoise.contrib.fastapi import register_tortoise
+
+from app.cache import poll_server_status_loop
 from app.views import router
-from app.cache import get_server_status  # so startup runs at least once
 
 app = FastAPI()
 
@@ -17,3 +20,7 @@ register_tortoise(
     add_exception_handlers=True,
 )
 
+
+@app.on_event("startup")
+async def start_polling():
+    asyncio.create_task(poll_server_status_loop(interval_seconds=60))
