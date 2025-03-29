@@ -122,6 +122,23 @@ if __name__ == "__main__":
     elif cmd == "checkmodels":
         asyncio.run(check_models())
 
+    elif cmd == "pollplayers":
+        async def poll_players():
+            from app.rcon_utils import save_server_snapshot
+
+            # TODO: Replace this with actual RCON fetching
+            fake_status = "Online"
+            fake_players = ["Steve", "Alex"]
+            fake_max = 20
+
+            print(f"📡 Polling server... Found {len(fake_players)} players online.")
+            await init_db()
+            await save_server_snapshot(fake_status, fake_players, fake_max)
+            await Tortoise.close_connections()
+            print("✅ Server snapshot saved.")
+
+        asyncio.run(poll_players())
+        
     else:
         print("""Usage: manage.py [command]
 

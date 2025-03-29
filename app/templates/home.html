@@ -6,8 +6,21 @@
     <div class="col-md-6">
         <h2>🟢 Server Status</h2>
         <p>Status: <strong class="{{ 'text-success' if server_status == 'Online' else 'text-danger' }}">{{ server_status }}</strong></p>
-        <p>Players Online: <strong>{{ players_online }}</strong> / {{ max_players }}</p>
-    </div>
+        <div class="mb-4">
+            <h2>Players Online</h2>
+            <p>{{ players_online }} / {{ max_players }}</p>
+        
+            {% if online_names %}
+                <ul>
+                    {% for name in online_names %}
+                        <li>{{ name }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No players online</p>
+            {% endif %}
+        </div>
+            </div>
     <div class="col-md-6">
         <h2>ℹ️ Server Info</h2>
         <ul class="list-group">
