@@ -1,6 +1,6 @@
 import os
 
-from fastapi import APIRouter, Form, Request, status
+from fastapi import APIRouter, Form, Request, Response, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -40,7 +40,6 @@ async def homepage(request: Request):
 
     # Last few historical snapshots for context (optional)
     snapshots = await ServerSnapshot.all().order_by("-timestamp").limit(5)
-    user = await current_user(request)
 
     return templates.TemplateResponse(
         "home.html",
@@ -53,7 +52,7 @@ async def homepage(request: Request):
             "server_info": server_info,
             "downloads": downloads,
             "snapshots": snapshots,
-            "user": user,
+            "current_user": await current_user(request),
         },
     )
 
@@ -122,20 +121,31 @@ async def logout(request: Request):
 @router.get("/admin")
 @admin_required
 async def admin_dashboard(request: Request):
-    user = await current_user(request)
-
-    return templates.TemplateResponse("admin.html", {"request": request, "user": user})
+    return templates.TemplateResponse("admin.html", {"request": request, "current_user": await current_user(request)})
 
 
 @router.get("/admin/users")
 @admin_required
-async def user_list(request: Request):
-    users = await User.all().order_by("created_at")
-    user = await current_user(request)
-    return templates.TemplateResponse(
-        "admin_users.html",
-        {"request": request, "users": users, "user": user},
-    )
+async def user_list(request: Request, page: int = 1, search: str = ""):
+    query = User.all()
+    if search:
+        query = query.filter(username__icontains=search)
+
+    PAGE_SIZE = 10
+    users = await query.order_by("created_at").offset((page - 1) * PAGE_SIZE).limit(PAGE_SIZE)
+    total = await query.count()
+    total_pages = (total + PAGE_SIZE - 1) // PAGE_SIZE
+    
+    
+
+    return templates.TemplateResponse("admin_users.html", {
+        "request": request,
+        "users": users,
+        "search": search,
+        "page": page,
+        "total_pages": total_pages,
+        "current_user": await current_user(request),
+    })
 
 
 @router.post("/admin/approve/{user_id}")
@@ -156,3 +166,22 @@ async def promote_user(request: Request, user_id: int):
         user.is_admin = True
         await user.save()
     return RedirectResponse("/admin/users", status_code=302)
+
+
+@router.post("/admin/delete/{user_id}")
+@admin_required
+async def delete_user(request: Request, user_id: int):
+    user_to_delete = await User.get_or_none(id=user_id)
+    if user_to_delete:
+        await user_to_delete.delete()
+    return RedirectResponse("/admin/users", status_code=302)
+
+
+@router.post("/admin/toggle/{user_id}/{field}")
+@admin_required
+async def toggle_user_flag(request: Request, user_id: int, field: str):
+    user = await User.get_or_none(id=user_id)
+    if user and field in {"is_admin", "is_approved"}:
+        setattr(user, field, not getattr(user, field))
+        await user.save()
+    return Response(status_code=204)

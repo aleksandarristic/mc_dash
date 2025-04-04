@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">User Management</h1>
+
+<table class="table table-bordered table-hover align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Approved</th>
+      <th>Admin</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.username }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ "✅" if user.is_approved else "❌" }}</td>
+      <td>{{ "👑" if user.is_admin else "" }}</td>
+      <td>
+        
+        <button class="btn btn-sm btn-outline-secondary me-1" 
+                onclick="toggleUserFlag({{ user.id }}, 'is_approved')">
+                {% if user.is_approved %}❌ Revoke{% else %}✅ Approve{% endif %}
+        </button>
+
+        <button class="btn btn-sm btn-outline-warning"
+                onclick="toggleUserFlag({{ user.id }}, 'is_admin')">
+                {% if user.is_admin %}🧍 Demote{% else %}👑 Promote{% endif %}
+        </button>
+      </td>
+      <td>
+        <form method="post" action="/admin/delete/{{ user.id }}" class="d-inline">
+          <button class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block script %}
+<script>
+    async function toggleUserFlag(userId, field) {
+      const response = await fetch(`/admin/toggle/${userId}/${field}`, {
+        method: "POST",
+      });
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        alert("Failed to update user.");
+      }
+    }
+    </script>    
+{% endblock %}
