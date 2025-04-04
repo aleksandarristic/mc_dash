@@ -59,12 +59,12 @@ async def homepage(request: Request):
 ### USER LOGIN AND REGISTRATION
 
 
-@app.get("/register")
+@router.get("/register")
 async def register_form(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 
-@app.post("/register")
+@router.post("/register")
 async def register_user(
     request: Request,
     username: str = Form(...),
@@ -83,13 +83,13 @@ async def register_user(
     )
 
 
-@app.get("/login")
+@router.get("/login")
 async def login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
 
-@app.post("/login")
+@router.post("/login")
 async def login_user(
     request: Request, username: str = Form(...), password: str = Form(...)
 ):
@@ -106,7 +106,7 @@ async def login_user(
     return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-@app.get("/logout")
+@router.get("/logout")
 async def logout(response: Response):
     response.delete_cookie("auth_token")
     return response
@@ -115,13 +115,13 @@ async def logout(response: Response):
 # ADMIN ROUTES - MOVE TO ANOTHER APP
 
 
-@app.get("/admin")
+@router.get("/admin")
 @admin_required
 async def admin_dashboard(request: Request):
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
-@app.get("/admin/users")
+@router.get("/admin/users")
 @admin_required
 async def user_list(request: Request):
     users = await User.all().order_by("created_at")
@@ -130,7 +130,7 @@ async def user_list(request: Request):
     )
 
 
-@app.post("/admin/approve/{user_id}")
+@router.post("/admin/approve/{user_id}")
 @admin_required
 async def approve_user(request: Request, user_id: int):
     user = await User.get_or_none(id=user_id)
@@ -140,7 +140,7 @@ async def approve_user(request: Request, user_id: int):
     return RedirectResponse("/admin/users", status_code=302)
 
 
-@app.post("/admin/promote/{user_id}")
+@router.post("/admin/promote/{user_id}")
 @admin_required
 async def promote_user(request: Request, user_id: int):
     user = await User.get_or_none(id=user_id)

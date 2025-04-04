@@ -8,3 +8,4 @@ ipython
 nest_asyncio
 mcrcon
 bcrypt
+itsdangerous
