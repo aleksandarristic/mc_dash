@@ -5,12 +5,25 @@
 {% block content %}
 <h1 class="mb-4">User Management</h1>
 
+{% if message %}
+<div class="alert alert-success">
+  {{ message }}
+</div>
+{% endif %}
+
 <!-- 🔍 Search Bar -->
 <form method="get" class="mb-4 d-flex" action="/admin/users">
   <input type="text" name="search" class="form-control me-2" placeholder="Search users..." value="{{ search }}">
   <button type="submit" class="btn btn-outline-primary">Search</button>
 </form>
 
+<!-- 📋 Create User -->
+<div class="mb-3 text-end">
+    <a href="/admin/create" class="btn btn-sm btn-success">
+      ➕ Create User
+    </a>
+  </div>
+  
 <!-- 👥 User Table -->
 <table class="table table-bordered table-hover align-middle">
   <thead class="table-light">
@@ -23,22 +36,22 @@
     </tr>
   </thead>
   <tbody>
-    {% for user in users %}
+    {% for u in users %}
     <tr>
-      <td>{{ user.username }}</td>
-      <td>{{ user.email }}</td>
-      <td>{{ "✅" if user.is_approved else "❌" }}</td>
-      <td>{{ "👑" if user.is_admin else "" }}</td>
+      <td>{{ u.username }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ "✅" if u.is_approved else "❌" }}</td>
+      <td>{{ "👑" if u.is_admin else "" }}</td>
       <td>
         <!-- Toggle buttons -->
         <button class="btn btn-sm btn-outline-secondary me-1"
-                onclick="toggleUserFlag({{ user.id }}, 'is_approved')">
-          {% if user.is_approved %}❌ Revoke{% else %}✅ Approve{% endif %}
+                onclick="toggleUserFlag({{ u.id }}, 'is_approved')">
+          {% if u.is_approved %}❌ Revoke{% else %}✅ Approve{% endif %}
         </button>
 
         <button class="btn btn-sm btn-outline-warning me-1"
-                onclick="toggleUserFlag({{ user.id }}, 'is_admin')">
-          {% if user.is_admin %}🧍 Demote{% else %}👑 Promote{% endif %}
+                onclick="toggleUserFlag({{ u.id }}, 'is_admin')">
+          {% if u.is_admin %}🧍 Demote{% else %}👑 Promote{% endif %}
         </button>
 
         <form method="post" action="/admin/delete/{{ user.id }}" class="d-inline"

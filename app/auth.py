@@ -67,7 +67,7 @@ async def create_user(username: str, email: str, password: str):
 # --- Utility ---
 
 
-async def current_user(request: Request):
+async def get_user_from_session(request: Request):
     """
     Return the currently logged-in user object, or None.
     """

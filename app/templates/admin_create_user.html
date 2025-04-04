@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Create New User</h1>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% elif message %}
+<div class="alert alert-success">{{ message }}</div>
+{% endif %}
+
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Username</label>
+    <input type="text" class="form-control" name="username" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-control" name="email" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Password</label>
+    <input type="password" class="form-control" name="password" required>
+  </div>
+
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="is_approved" id="is_approved">
+    <label class="form-check-label" for="is_approved">Approved</label>
+  </div>
+
+  <div class="form-check mb-4">
+    <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+    <label class="form-check-label" for="is_admin">Admin</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Create User</button>
+  <a href="/admin/users" class="btn btn-outline-secondary ms-2">Cancel</a>
+</form>
+{% endblock %}

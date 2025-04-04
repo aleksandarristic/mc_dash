@@ -3,14 +3,18 @@ import os
 from fastapi import APIRouter, Form, Request, Response, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from passlib.hash import bcrypt
 
 import app.config
-from app.auth import admin_required, create_user, current_user, login_required
+from app.auth import admin_required, create_user, login_required
 from app.cache import get_server_status
 from app.models import ServerSnapshot, User
 
 router = APIRouter()
+
 templates = Jinja2Templates(directory="app/templates")
+templates.env.globals["get_user"] = lambda request: getattr(request.state, "user", None)
+
 
 
 @router.get("/")
@@ -52,7 +56,6 @@ async def homepage(request: Request):
             "server_info": server_info,
             "downloads": downloads,
             "snapshots": snapshots,
-            "current_user": await current_user(request),
         },
     )
 
@@ -121,7 +124,7 @@ async def logout(request: Request):
 @router.get("/admin")
 @admin_required
 async def admin_dashboard(request: Request):
-    return templates.TemplateResponse("admin.html", {"request": request, "current_user": await current_user(request)})
+    return templates.TemplateResponse("admin.html", {"request": request})
 
 
 @router.get("/admin/users")
@@ -132,20 +135,24 @@ async def user_list(request: Request, page: int = 1, search: str = ""):
         query = query.filter(username__icontains=search)
 
     PAGE_SIZE = 10
-    users = await query.order_by("created_at").offset((page - 1) * PAGE_SIZE).limit(PAGE_SIZE)
+    users = (
+        await query.order_by("created_at")
+        .offset((page - 1) * PAGE_SIZE)
+        .limit(PAGE_SIZE)
+    )
     total = await query.count()
     total_pages = (total + PAGE_SIZE - 1) // PAGE_SIZE
-    
-    
 
-    return templates.TemplateResponse("admin_users.html", {
-        "request": request,
-        "users": users,
-        "search": search,
-        "page": page,
-        "total_pages": total_pages,
-        "current_user": await current_user(request),
-    })
+    return templates.TemplateResponse(
+        "admin_users.html",
+        {
+            "request": request,
+            "users": users,
+            "search": search,
+            "page": page,
+            "total_pages": total_pages,
+        },
+    )
 
 
 @router.post("/admin/approve/{user_id}")
@@ -185,3 +192,42 @@ async def toggle_user_flag(request: Request, user_id: int, field: str):
         setattr(user, field, not getattr(user, field))
         await user.save()
     return Response(status_code=204)
+
+
+@router.get("/admin/create")
+@admin_required
+async def admin_create_user_form(request: Request):
+    return templates.TemplateResponse("admin_create_user.html", {"request": request})
+
+
+@router.post("/admin/create")
+@admin_required
+async def admin_create_user_submit(
+    request: Request,
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    is_approved: bool = Form(False),
+    is_admin: bool = Form(False),
+):
+    existing = await User.get_or_none(username=username)
+    if existing:
+        return templates.TemplateResponse(
+            "admin_create_user.html",
+            {"request": request, "error": "Username already exists"},
+        )
+
+    hash_pw = bcrypt.hash(password)
+
+    await User.create(
+        username=username,
+        email=email,
+        password_hash=hash_pw,
+        is_approved=is_approved,
+        is_admin=is_admin,
+    )
+
+    return RedirectResponse(
+        f"/admin/users?message=User+{username}+created",
+        status_code=status.HTTP_302_FOUND,
+    )

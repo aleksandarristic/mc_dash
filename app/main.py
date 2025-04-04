@@ -7,12 +7,16 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app import config
 from app.cache import poll_server_status_loop
+from app.middleware import add_user_to_request_middleware
 from app.views import router
 
 app = FastAPI()
 
 # 🔐 Add session middleware (required for login sessions)
 app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
+
+# 🛡️ Add custom middleware to attach user to request, only for http tho
+app.middleware("http")(add_user_to_request_middleware)
 
 # Static files (e.g., downloads)
 app.mount(config.STATIC['URL'], StaticFiles(directory=config.STATIC['DIR']), name="static")

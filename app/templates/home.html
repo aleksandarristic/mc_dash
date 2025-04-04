@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Minecraft Server{% endblock %}
 
+{% block navbar %}
+    {% if user and user.is_admin %}
+    <div class="mb-3 text-end">
+        <a href="/admin" class="btn btn-sm btn-outline-secondary">
+        🛠️ Admin Panel
+        </a>
+    </div>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-6">
