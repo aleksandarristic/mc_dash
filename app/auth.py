@@ -1,37 +1,44 @@
-from fastapi import Request, HTTPException
 from functools import wraps
+
 import bcrypt
+from fastapi import Request
+from fastapi.responses import RedirectResponse
+
 from app.models import User
 
 # --- Decorators ---
 
+
 def login_required(func):
-    """Require that a user is logged in to access this route."""
     @wraps(func)
     async def wrapper(request: Request, *args, **kwargs):
         user_id = request.session.get("user_id")
         if not user_id:
-            raise HTTPException(status_code=403, detail="Login required")
+            return RedirectResponse("/login", status_code=302)
         user = await User.get_or_none(id=user_id)
         if not user or not user.is_approved:
-            raise HTTPException(status_code=403, detail="Approval required")
+            return RedirectResponse("/login", status_code=302)
         return await func(request, *args, **kwargs)
+
     return wrapper
 
+
 def admin_required(func):
-    """Require that the current user is an approved admin."""
     @wraps(func)
     async def wrapper(request: Request, *args, **kwargs):
         user_id = request.session.get("user_id")
         if not user_id:
-            raise HTTPException(status_code=403, detail="Login required")
+            return RedirectResponse("/login", status_code=302)
         user = await User.get_or_none(id=user_id)
         if not user or not user.is_admin or not user.is_approved:
-            raise HTTPException(status_code=403, detail="Admin access required")
+            return RedirectResponse("/login", status_code=302)
         return await func(request, *args, **kwargs)
+
     return wrapper
 
+
 # --- Core Auth Logic ---
+
 
 async def authenticate_user(username: str, password: str):
     """
@@ -41,6 +48,7 @@ async def authenticate_user(username: str, password: str):
     if user and user.is_approved and bcrypt.verify(password, user.password_hash):
         return user
     return None
+
 
 async def create_user(username: str, email: str, password: str):
     """
@@ -52,10 +60,12 @@ async def create_user(username: str, email: str, password: str):
         email=email,
         password_hash=hash_pw,
         is_admin=False,
-        is_approved=False
+        is_approved=False,
     )
 
+
 # --- Utility ---
+
 
 async def current_user(request: Request):
     """

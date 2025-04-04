@@ -103,13 +103,16 @@ async def login_user(
             "login.html", {"request": request, "error": "User not approved"}
         )
 
+    # log the user in
+    request.session["user_id"] = user.id
+
     return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
 @router.get("/logout")
-async def logout(response: Response):
-    response.delete_cookie("auth_token")
-    return response
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/", status_code=302)
 
 
 # ADMIN ROUTES - MOVE TO ANOTHER APP
