@@ -1,6 +1,6 @@
 import os
 
-from fastapi import APIRouter, Form, Request, Response, status
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -86,7 +86,6 @@ async def register_user(
 @router.get("/login")
 async def login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
-
 
 
 @router.post("/login")

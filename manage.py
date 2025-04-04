@@ -2,25 +2,19 @@ import asyncio
 import getpass
 import sys
 
-import bcrypt
 import uvicorn
-from tortoise import Tortoise, run_async
+from passlib.hash import bcrypt
+from tortoise import Tortoise
 
-from app import config, models
+from app import config
+from app.models import User, ServerSnapshot
 from app.cache import poll_and_cache
-from app.db import generate_schema, init_db
-from app.models import User
+from app.db import generate_schema, init_db, setup_tortoise_if_needed, with_db
 
 
 async def get_server_status():
-    return await models.ServerSnapshot.first()
+    return await ServerSnapshot.first()
 
-
-async def setup_tortoise_if_needed():
-    if not Tortoise._inited:
-        await Tortoise.init(
-            db_url="sqlite://db.sqlite3", modules={"models": ["app.models"]}
-        )
 
 def start_shell(initdb=False):
     import IPython
@@ -42,10 +36,11 @@ Utils:
 
     namespace = {
         "Tortoise": Tortoise,
-        "models": models,
         "get_server_status": get_server_status,
         "config": config,
         "asyncio": asyncio,
+        "User": User,
+        "ServerSnapshot": ServerSnapshot,
     }
 
     async def prepare():
@@ -98,6 +93,7 @@ async def fetch_status():
     print("✅ Status snapshot saved.")
 
 
+@with_db
 async def create_admin():
     username = input("Username: ")
     email = input("Email: ")
@@ -119,6 +115,7 @@ async def create_admin():
     print(f"✅ Admin user '{username}' created.")
 
 
+@with_db
 async def create_user():
     username = input("Username: ")
     email = input("Email: ")
@@ -140,6 +137,7 @@ async def create_user():
     print(f"✅ User '{username}' created.")
 
 
+@with_db
 async def promote_user(username):
     user = await User.get_or_none(username=username)
     if not user:
@@ -151,6 +149,7 @@ async def promote_user(username):
         print(f"✅ User '{username}' promoted to admin.")
 
 
+@with_db
 async def activate_user(username):
     user = await User.get_or_none(username=username)
     if not user:
@@ -161,6 +160,7 @@ async def activate_user(username):
         print(f"✅ User '{username}' activated.")
 
 
+@with_db
 async def deactivate_user(username):
     user = await User.get_or_none(username=username)
     if not user:
@@ -171,6 +171,7 @@ async def deactivate_user(username):
         print(f"✅ User '{username}' deactivated.")
 
 
+@with_db
 async def delete_user(username):
     user = await User.get_or_none(username=username)
     if not user:
@@ -201,16 +202,16 @@ if __name__ == "__main__":
         uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
 
     elif cmd == "fetchstatus":
-        run_async(fetch_status())
+        asyncio.run(fetch_status())
 
     elif cmd == "checkmodels":
         asyncio.run(check_models())
 
     ### USER MANAGEMENT COMMANDS
-    elif args.command == "createsuperuser":
+    elif cmd == "createsuperuser":
         asyncio.run(create_admin())
 
-    elif args.command == "createuser":
+    elif cmd == "createuser":
         asyncio.run(create_user())
 
     elif cmd == "promote":
@@ -234,18 +235,26 @@ if __name__ == "__main__":
         else:
             asyncio.run(deactivate_user(username=username))
 
-    elif cmd == "pollplayers":
-        asyncio.run(poll_and_cache())
-        print("✅ Server snapshot saved.")
-
     else:
         print("""Usage: manage.py [command]
 
 Commands:
-  initdb           Create tables (if not exist)
-  migrate          Sync schema without data loss
-  resetdb          Drop and recreate all tables
-  fetchstatus      Fetch and save server status
-  shell [--initdb] Start interactive IPython shell
-  runserver        Run FastAPI app (localhost:8000)
+    shell [--initdb] Start interactive IPython shell
+
+    initdb              Create tables (if not exist)
+    migrate             Sync schema without data loss
+    resetdb             Drop and recreate all tables
+    checkmodels         Print discovered models
+              
+    createsuperuser     Create an admin user
+    createuser          Create a regular user
+    promote             Promote user to admin
+    activate            Activate user account
+    deactivate          Deactivate user account
+    deleteuser          Delete user account
+    
+              
+    fetchstatus         Fetch and save server status
+              
+    runserver           Run FastAPI app (localhost:8000)
 """)

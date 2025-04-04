@@ -7,5 +7,6 @@ python-multipart
 ipython
 nest_asyncio
 mcrcon
-bcrypt
 itsdangerous
+bcrypt<4.1.0
+passlib>=1.7.4

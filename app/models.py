@@ -1,4 +1,5 @@
 from tortoise import fields, models
+from passlib.hash import bcrypt
 
 
 class User(models.Model):
@@ -9,6 +10,13 @@ class User(models.Model):
     is_admin = fields.BooleanField(default=False)
     is_approved = fields.BooleanField(default=False)
     created_at = fields.DatetimeField(auto_now_add=True)
+
+    def verify_password(self, raw_password: str) -> bool:
+        return bcrypt.verify(raw_password, self.password_hash)
+    
+    def set_password(self, raw_password: str) -> None:
+        self.password_hash = bcrypt.hash(raw_password)
+        self.save()
 
 
 class ServerSnapshot(models.Model):
