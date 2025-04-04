@@ -1,8 +1,8 @@
 from functools import wraps
 
-import bcrypt
 from fastapi import Request
 from fastapi.responses import RedirectResponse
+from passlib.hash import bcrypt
 
 from app.models import User
 

@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 import app.config
-from app.auth import admin_required, login_required
+from app.auth import admin_required, create_user, current_user, login_required
 from app.cache import get_server_status
 from app.models import ServerSnapshot, User
 
@@ -40,6 +40,7 @@ async def homepage(request: Request):
 
     # Last few historical snapshots for context (optional)
     snapshots = await ServerSnapshot.all().order_by("-timestamp").limit(5)
+    user = await current_user(request)
 
     return templates.TemplateResponse(
         "home.html",
@@ -52,6 +53,7 @@ async def homepage(request: Request):
             "server_info": server_info,
             "downloads": downloads,
             "snapshots": snapshots,
+            "user": user,
         },
     )
 
@@ -77,7 +79,7 @@ async def register_user(
             "register.html", {"request": request, "error": "Username already exists"}
         )
 
-    await User.create_user(username, email, password)
+    await create_user(username, email, password)
     return templates.TemplateResponse(
         "login.html", {"request": request, "message": "User registered successfully!"}
     )
@@ -120,15 +122,19 @@ async def logout(request: Request):
 @router.get("/admin")
 @admin_required
 async def admin_dashboard(request: Request):
-    return templates.TemplateResponse("admin.html", {"request": request})
+    user = await current_user(request)
+
+    return templates.TemplateResponse("admin.html", {"request": request, "user": user})
 
 
 @router.get("/admin/users")
 @admin_required
 async def user_list(request: Request):
     users = await User.all().order_by("created_at")
+    user = await current_user(request)
     return templates.TemplateResponse(
-        "admin_users.html", {"request": request, "users": users}
+        "admin_users.html",
+        {"request": request, "users": users, "user": user},
     )
 
 
