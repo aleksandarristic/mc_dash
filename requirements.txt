@@ -7,3 +7,4 @@ python-multipart
 ipython
 nest_asyncio
 mcrcon
+bcrypt

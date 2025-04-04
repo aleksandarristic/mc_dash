@@ -1,12 +1,15 @@
 import asyncio
+import getpass
 import sys
 
+import bcrypt
 import uvicorn
 from tortoise import Tortoise, run_async
 
 from app import config, models
 from app.cache import poll_and_cache
 from app.db import generate_schema, init_db
+from app.models import User
 
 
 async def get_server_status():
@@ -18,7 +21,6 @@ async def setup_tortoise_if_needed():
         await Tortoise.init(
             db_url="sqlite://db.sqlite3", modules={"models": ["app.models"]}
         )
-
 
 def start_shell(initdb=False):
     import IPython
@@ -96,6 +98,88 @@ async def fetch_status():
     print("✅ Status snapshot saved.")
 
 
+async def create_admin():
+    username = input("Username: ")
+    email = input("Email: ")
+    password = getpass.getpass("Password: ")
+    hash_pw = bcrypt.hash(password)
+
+    existing_user = await User.get_or_none(username=username)
+    if existing_user:
+        print("User already exists!")
+        return
+
+    await User.create(
+        username=username,
+        email=email,
+        password_hash=hash_pw,
+        is_admin=True,
+        is_approved=True,
+    )
+    print(f"✅ Admin user '{username}' created.")
+
+
+async def create_user():
+    username = input("Username: ")
+    email = input("Email: ")
+    password = getpass.getpass("Password: ")
+    hash_pw = bcrypt.hash(password)
+
+    existing_user = await User.get_or_none(username=username)
+    if existing_user:
+        print("User already exists!")
+        return
+
+    await User.create(
+        username=username,
+        email=email,
+        password_hash=hash_pw,
+        is_admin=False,
+        is_approved=False,
+    )
+    print(f"✅ User '{username}' created.")
+
+
+async def promote_user(username):
+    user = await User.get_or_none(username=username)
+    if not user:
+        print("❌ User not found")
+    else:
+        user.is_admin = True
+        user.is_approved = True
+        await user.save()
+        print(f"✅ User '{username}' promoted to admin.")
+
+
+async def activate_user(username):
+    user = await User.get_or_none(username=username)
+    if not user:
+        print("❌ User not found")
+    else:
+        user.is_approved = True
+        await user.save()
+        print(f"✅ User '{username}' activated.")
+
+
+async def deactivate_user(username):
+    user = await User.get_or_none(username=username)
+    if not user:
+        print("❌ User not found")
+    else:
+        user.is_approved = False
+        await user.save()
+        print(f"✅ User '{username}' deactivated.")
+
+
+async def delete_user(username):
+    user = await User.get_or_none(username=username)
+    if not user:
+        print("❌ User not found")
+    else:
+        await user.delete()
+        print(f"✅ User '{username}' deleted.")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else None
     args = sys.argv[2:]
@@ -122,23 +206,38 @@ if __name__ == "__main__":
     elif cmd == "checkmodels":
         asyncio.run(check_models())
 
+    ### USER MANAGEMENT COMMANDS
+    elif args.command == "createsuperuser":
+        asyncio.run(create_admin())
+
+    elif args.command == "createuser":
+        asyncio.run(create_user())
+
+    elif cmd == "promote":
+        username = args[0] if args else None
+        if not username:
+            print("Usage: manage.py promote <username>")
+        else:
+            asyncio.run(promote_user(username=username))
+
+    elif cmd == "activate":
+        username = args[0] if args else None
+        if not username:
+            print("Usage: manage.py activate <username>")
+        else:
+            asyncio.run(activate_user(username=username))
+
+    elif cmd == "deactivate":
+        username = args[0] if args else None
+        if not username:
+            print("Usage: manage.py deactivate <username>")
+        else:
+            asyncio.run(deactivate_user(username=username))
+
     elif cmd == "pollplayers":
-        async def poll_players():
-            from app.rcon_utils import save_server_snapshot
+        asyncio.run(poll_and_cache())
+        print("✅ Server snapshot saved.")
 
-            # TODO: Replace this with actual RCON fetching
-            fake_status = "Online"
-            fake_players = ["Steve", "Alex"]
-            fake_max = 20
-
-            print(f"📡 Polling server... Found {len(fake_players)} players online.")
-            await init_db()
-            await save_server_snapshot(fake_status, fake_players, fake_max)
-            await Tortoise.close_connections()
-            print("✅ Server snapshot saved.")
-
-        asyncio.run(poll_players())
-        
     else:
         print("""Usage: manage.py [command]
 
