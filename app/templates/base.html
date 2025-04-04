@@ -12,6 +12,9 @@
         <a class="navbar-brand" href="/">Vukov Minecraft Server</a>
 
         {% if request.session.user_id and current_user %}
+            {% if current_user.is_admin %}
+            <a href="/admin" class="btn btn-outline-light me-2" title="Open admin panel">Admin</a>
+            {% endif %}
         <div class="d-flex align-items-center text-white">
             <span class="me-3">👋 Welcome, <strong>{{ current_user.username }}</strong></span>
             <form method="get" action="/logout" onsubmit="return confirmLogout();" class="d-inline m-0">

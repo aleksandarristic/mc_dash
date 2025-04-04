@@ -5,6 +5,13 @@
 {% block content %}
 <h1 class="mb-4">User Management</h1>
 
+<!-- 🔍 Search Bar -->
+<form method="get" class="mb-4 d-flex" action="/admin/users">
+  <input type="text" name="search" class="form-control me-2" placeholder="Search users..." value="{{ search }}">
+  <button type="submit" class="btn btn-outline-primary">Search</button>
+</form>
+
+<!-- 👥 User Table -->
 <table class="table table-bordered table-hover align-middle">
   <thead class="table-light">
     <tr>
@@ -23,39 +30,54 @@
       <td>{{ "✅" if user.is_approved else "❌" }}</td>
       <td>{{ "👑" if user.is_admin else "" }}</td>
       <td>
-        
-        <button class="btn btn-sm btn-outline-secondary me-1" 
+        <!-- Toggle buttons -->
+        <button class="btn btn-sm btn-outline-secondary me-1"
                 onclick="toggleUserFlag({{ user.id }}, 'is_approved')">
-                {% if user.is_approved %}❌ Revoke{% else %}✅ Approve{% endif %}
+          {% if user.is_approved %}❌ Revoke{% else %}✅ Approve{% endif %}
         </button>
 
-        <button class="btn btn-sm btn-outline-warning"
+        <button class="btn btn-sm btn-outline-warning me-1"
                 onclick="toggleUserFlag({{ user.id }}, 'is_admin')">
-                {% if user.is_admin %}🧍 Demote{% else %}👑 Promote{% endif %}
+          {% if user.is_admin %}🧍 Demote{% else %}👑 Promote{% endif %}
         </button>
-      </td>
-      <td>
-        <form method="post" action="/admin/delete/{{ user.id }}" class="d-inline">
-          <button class="btn btn-sm btn-danger">Delete</button>
+
+        <form method="post" action="/admin/delete/{{ user.id }}" class="d-inline"
+              onsubmit="return confirm('Are you sure you want to delete this user?');">
+          <button class="btn btn-sm btn-outline-danger">Delete</button>
         </form>
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-{% endblock %}
 
-{% block script %}
+<!-- 📄 Pagination -->
+{% if total_pages > 1 %}
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% for p in range(1, total_pages + 1) %}
+    <li class="page-item {% if p == page %}active{% endif %}">
+      <a class="page-link" href="/admin/users?page={{ p }}{% if search %}&search={{ search }}{% endif %}">
+        {{ p }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}
+
+<!-- 🔁 Toggle Script -->
 <script>
-    async function toggleUserFlag(userId, field) {
-      const response = await fetch(`/admin/toggle/${userId}/${field}`, {
-        method: "POST",
-      });
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        alert("Failed to update user.");
-      }
-    }
-    </script>    
+async function toggleUserFlag(userId, field) {
+  const response = await fetch(`/admin/toggle/${userId}/${field}`, {
+    method: "POST",
+  });
+  if (response.ok) {
+    window.location.reload();
+  } else {
+    alert("Failed to update user.");
+  }
+}
+</script>
+
 {% endblock %}
