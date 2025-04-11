@@ -1,0 +1,19 @@
+# sudo cp mc_dash.service /etc/systemd/system/
+# sudo systemctl daemon-reload
+# sudo systemctl enable mc_dash.service
+# sudo systemctl status mc_dash.service
+
+[Unit]
+Description=Minecraft Dashboard FastAPI app
+After=network.target
+
+[Service]
+User=mcserver
+WorkingDirectory=/home/mcserver/mc_dash
+ExecStart=/home/mcserver/mc_dash/runserver.sh
+Restart=always
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

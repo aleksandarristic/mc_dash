@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Minecraft Server{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    
+    <div class="col-md-6">
+        <h2>🟢 Status servera</h2>
+        <p>Status: <strong class="{{ 'text-success' if server_status == 'Online' else 'text-danger' }}">{{ server_status }}</strong></p>
+        <div class="mb-4">
+            <h2>Igrači online</h2>
+            <p>{{ players_online }} / {{ max_players }}</p>
+        
+            {% if online_names %}
+            <ul>
+                {% for name in online_names %}
+                {% set player = player_info_map.get(name) %}
+                <li>
+                    {{ name }}
+                    {% if player %}
+                    <small class="text-muted">{{ player.last_seen_coords() }}</small>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Nema igrača online</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h2>ℹ️ Informacije</h2>
+        <ul class="list-group">
+            <li class="list-group-item position-relative">
+                Adresa: 
+                <button 
+                    class="btn btn-sm btn-outline-secondary ms-2 copy-btn" 
+                    onclick="copyToClipboard('{{ server_info.ip }}', this)"
+                    title="Klikni da kopiraš"
+                >
+                    {{ server_info.ip }}
+                </button>
+                <span class="copied-badge badge bg-success position-absolute top-0 start-100 translate-middle visually-hidden">
+                    Iskopirano!
+                </span>
+            </li>
+            <li class="list-group-item">Verzija: <strong>{{ server_info.version }}</strong></li>
+            <li class="list-group-item">MOTD: <em>{{ server_info.motd }}</em></li>
+        </ul>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+        <h5 class="card-title">Igrači danas</h5>
+        {% if players_today %}
+            <ul class="list-group list-group-flush">
+            {% for p in players_today %}
+                <li class="list-group-item">
+                {{ p.name }} — {{ p.last_seen_time(format='%H:%M:%S') }}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>Danas nije bilo nikoga.</p>
+        {% endif %}
+        </div>
+    </div>
+
+
+  {% if user and user.game_player %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Teleport</h5>
+            
+            <p>Trenutna lokacija kuće: {{ user.game_player.home_coords() }}</p>
+            
+            <form id="set-home-form" method="post" data-url="{{ url_for('minecraft_set_home') }}" class="mb-2">
+                <button class="btn btn-primary w-100" onclick="return confirm('Ovim ćeš postaviti koordinate svoje kuće na trenutnu lokaciju u igri. Da li si siguran da želiš da postaviš nove koordinate za svoju kuću?');">
+                    Podesi kuću na trenutnu lokaciju
+                </button>
+            </form>
+    
+            <form id="teleport-home-form" method="post" data-url="{{ url_for('minecraft_teleport_home') }}">
+                <button class="btn btn-secondary w-100" onclick="return confirm('Da li si siguran da želiš da se teleportuješ kući?');">
+                    Izgubio sam se – pošalji me kući!
+                </button>
+            </form>
+        </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<div class="mb-4">
+    <h2>📦 Preuzmi</h2>
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <p class="strong">journeymap-forge-1.21.3-6.0.0-beta.31.jar</p>
+            Mod za mape koji omogućava teleportovanje.
+            <a class="btn btn-sm btn-outline-primary" href="https://mediafilez.forgecdn.net/files/5950/312/journeymap-forge-1.21.3-6.0.0-beta.31.jar" download>Preuzmi</a>
+        </li>
+    </ul>
+</div>
+
+<h2 class="mt-5">🔗 Linkovi</h2>
+<ul class="list-group">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        Preuzmi TLauncher
+        <a href="https://tlauncher.org/en/" target="_blank" class="btn btn-sm btn-outline-secondary">Idi</a>
+    </li>
+</ul>
+<script>
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(function() {
+            const badge = button.parentElement.querySelector('.copied-badge');
+            badge.classList.remove("visually-hidden");
+            badge.classList.add("show");
+    
+            setTimeout(() => {
+                badge.classList.add("visually-hidden");
+                badge.classList.remove("show");
+            }, 1500);
+        }, function(err) {
+            console.error('Failed to copy', err);
+        });
+    }
+    </script>
+    
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      function handleAjaxForm(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+    
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const url = form.dataset.url;
+    
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest"
+            }
+          });
+    
+          const result = await response.json();
+          showFlash(result.message, result.success ? "success" : "danger");
+        });
+      }
+    
+      function showFlash(message, category = "info") {
+        const container = document.getElementById("flash-container");
+        container.innerHTML = `
+        <div class="container mt-3">
+          <div class="alert alert-${category} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+        `;
+      }
+    
+      handleAjaxForm("set-home-form");
+      handleAjaxForm("teleport-home-form");
+    });
+    </script>
+{% endblock %}    

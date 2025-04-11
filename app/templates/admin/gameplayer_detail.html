@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Detalji igrača - {{ player.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="/">Početna</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Administracija</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin_gameplayer_list') }}">Lista igrača</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ player.name }}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Igrač: {{ player.name }}</h1>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h5>Detalji</h5>
+    <p><strong>Poslednji put viđen:</strong> {{ player.last_seen_time() }}</p>
+    <p><strong>Poslednje koordinate:</strong> {{ player.last_seen_coords() }}</p>
+    <p><strong>Kuća:</strong> {{ player.home_coords() }}</p>
+    <p><strong>Povezani korisnik:</strong> 
+      {% if player.linked_users %}
+        {% for u in player.linked_users %}
+          <a href="{{ url_for('admin_user_list') }}?search={{ u.username }}">{{ u.username }}</a>{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      {% else %}
+        —
+      {% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <h5>Update Home Coordinates</h5>
+    <form method="post" action="{{ url_for('admin_update_coords', player_id=player.id) }}" class="row g-2">
+      <div class="col"><input type="number" step="any" name="home_x" class="form-control" placeholder="X" value="{{ player.home_x or '' }}" required></div>
+      <div class="col"><input type="number" step="any" name="home_y" class="form-control" placeholder="Y" value="{{ player.home_y or '' }}" required></div>
+      <div class="col"><input type="number" step="any" name="home_z" class="form-control" placeholder="Z" value="{{ player.home_z or '' }}" required></div>
+      <div class="col">
+        <select name="home_dimension" class="form-select" required>
+          {% for dim in ['minecraft:overworld', 'minecraft:the_nether', 'minecraft:the_end'] %}
+            <option value="{{ dim }}" {% if player.home_dimension == dim %}selected{% endif %}>{{ dim }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto"><button class="btn btn-primary">Update</button></div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

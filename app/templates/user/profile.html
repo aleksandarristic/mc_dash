@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="/">Početna</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Profil</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<h2>{{ user.username }}</h2>
+<p><strong>Email:</strong> {{ user.email }}</p>
+
+<div class="row">
+  {% if user.game_player %}
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header">
+        Povezani igrač: <strong>{{ user.game_player.name }}</strong>
+      </div>
+      <div class="card-body">
+        <p><strong>Poslednji put viđen:</strong> {{ user.game_player.last_seen_time() }}</p>
+        <p><strong>Poslednje koordinate:</strong> {{ user.game_player.last_seen_coords() }}</p>
+        <p><strong>Koordinate kuće:</strong> {{ user.game_player.home_coords() }}</p>
+
+        {% if user.is_admin %}
+        <h5>Poveži igrača</h5>
+        <form method="post">
+          <select name="game_player_id" class="form-select">
+            <option value="">— ukloni —</option>
+            {% for player in game_players %}
+              <option value="{{ player.id }}" {% if user.game_player and user.game_player.id == player.id %}selected{% endif %}>
+                {{ player.name }}
+              </option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary mt-2" type="submit">Poveži</button>
+        </form>
+        {% endif %}
+        
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">🔒 Promeni lozinku</h5>
+        <form method="post" action="{{ url_for('user_change_password') }}">
+          <div class="mb-3">
+            <label for="old-password" class="form-label">Trenutna lozinka</label>
+            <div class="input-group">
+              <input type="password" name="old_password" class="form-control" id="old-password" required>
+              <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('old-password')">👁️</button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="new-password" class="form-label">Nova lozinka</label>
+            <div class="input-group">
+              <input type="password" name="password" class="form-control" id="new-password" required minlength="8">
+              <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('new-password')">👁️</button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm-password" class="form-label">Potvrdi novu lozinku</label>
+            <div class="input-group">
+              <input type="password" name="confirm_password" class="form-control" id="confirm-password" required minlength="8">
+              <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('confirm-password')">👁️</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-warning w-100">Promeni lozinku</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+  function togglePasswordVisibility(id) {
+    const field = document.getElementById(id);
+    field.type = field.type === "password" ? "text" : "password";
+  }
+</script>  
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Teleport{% endblock %}
+
+{% block content %}
+<h2>Teleport to Coordinates</h2>
+<form method="post" action="{{ url_for('teleport_to_custom_coords') }}">
+    <div class="mb-3">
+        <label>X:</label>
+        <input type="number" step="any" name="x" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Y:</label>
+        <input type="number" step="any" name="y" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Z:</label>
+        <input type="number" step="any" name="z" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Teleport</button>
+</form>
+{% endblock %}

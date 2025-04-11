@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Administracija{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="/">Početna</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Administracija</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Administracija</h1>
+
+<div class="list-group">
+  <a href="{{ url_for('admin_user_list') }}" class="list-group-item list-group-item-action">
+    👥 Lista korisnika
+  </a>
+</div>
+
+<div class="list-group">
+  <a href="{{ url_for('admin_gameplayer_list') }}" class="list-group-item list-group-item-action">
+    👥 Lista igrača
+  </a>
+</div>
+
+{% endblock %}

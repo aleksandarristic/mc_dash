@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Novi korisnik{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="/">Početna</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Administracija</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin_user_list') }}">Lista korisnika</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Novi korisnik</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Novi korisnik</h1>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% elif message %}
+<div class="alert alert-success">{{ message }}</div>
+{% endif %}
+
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Korisničko ime</label>
+    <input type="text" class="form-control" name="username" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-control" name="email" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Šifra</label>
+    <input type="password" class="form-control" name="password" required>
+  </div>
+
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="is_approved" id="is_approved">
+    <label class="form-check-label" for="is_approved">Odobren</label>
+  </div>
+
+  <div class="form-check mb-4">
+    <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+    <label class="form-check-label" for="is_admin">Administrator</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Napravi</button>
+  <a href="/admin/users" class="btn btn-outline-secondary ms-2">Otkaži</a>
+</form>
+{% endblock %}

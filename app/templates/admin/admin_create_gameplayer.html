@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Create Game Player{% endblock %}
+{% block content %}
+
+<h1 class="mb-4">Create New Game Player</h1>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form method="post" action="{{ url_for('admin_create_gameplayer') }}">
+  <div class="mb-3">
+    <label>Name:</label>
+    <input type="text" name="name" class="form-control" required>
+  </div>
+  <button type="submit" class="btn btn-success">Create</button>
+  <a href="{{ url_for('admin_gameplayer_list') }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

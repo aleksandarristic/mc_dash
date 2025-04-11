@@ -1,0 +1,6 @@
+db.sqlite3*
+__pycache__/
+.venv
+static/downloads/
+app/config_local.py
+logs/

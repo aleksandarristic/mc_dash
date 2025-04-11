@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Manage Game Players{% endblock %}
+
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="/">Početna</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Administracija</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Lista igrača</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">Igrači</h1>
+
+<div class="mb-3 text-end">
+  <a href="{{ url_for('admin_create_gameplayer_form') }}" class="btn btn-sm btn-success" title="Ova opcija se koristi samo ako igrač do sada nije bio na serveru pa ne postoji automatski napravljen.">➕ Napravi novog igrača</a>
+</div>
+
+<table class="table table-bordered table-hover align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Igrač</th>
+      <th>Korisnik</th>
+      <th>Poslednji put viđen</th>
+      <th>Poslednja lokacija</th>
+      <th>Lokacija kuće</th>
+      <th>Akcije</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in players %}
+    <tr>
+      <td>
+        <a href="{{ url_for('admin_gameplayer_detail', player_id=p.id) }}" class="text-decoration-none">
+          {{ p.name }}
+        </a>
+      </td>
+      <td>
+        {% if p.linked_users %}
+            {% for u in p.linked_users %}
+              <a href="{{ url_for('admin_user_list') }}?search={{ u.username }}">{{ u.username }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        {% else %}
+            —
+        {% endif %}
+            </td>
+      <td>
+        {{ p.last_seen_time() }}
+      </td>
+
+      <td>
+        {{ p.last_seen_coords() }}
+      </td>
+      
+      <td>
+        <form method="post" action="{{ url_for('admin_update_coords', player_id=p.id) }}" class="d-flex gap-1 flex-wrap">
+          <input type="number" placeholder="X" step="any" name="home_x" value="{{ p.home_x or '' }}" class="form-control form-control-sm w-auto" required>
+          <input type="number" placeholder="Y" step="any" name="home_y" value="{{ p.home_y or '' }}" class="form-control form-control-sm w-auto" required>
+          <input type="number" placeholder="Z" step="any" name="home_z" value="{{ p.home_z or '' }}" class="form-control form-control-sm w-auto" required>
+      
+          <select name="home_dimension" class="form-select form-select-sm w-auto">
+            <option value="">Dimenzija</option>
+            <option value="minecraft:overworld" {% if p.home_dimension == "minecraft:overworld" %}selected{% endif %}>Overworld</option>
+            <option value="minecraft:the_nether" {% if p.home_dimension == "minecraft:the_nether" %}selected{% endif %}>Nether</option>
+            <option value="minecraft:the_end" {% if p.home_dimension == "minecraft:the_end" %}selected{% endif %}>End</option>
+          </select>
+      
+          <button type="submit" class="btn btn-sm btn-outline-primary" title="Ažuriraj">💾</button>
+        </form>
+      </td>
+      
+
+      <td>
+        <form method="post" action="{{ url_for('admin_delete_gameplayer', player_id=p.id) }}"
+              onsubmit="return confirm('Da li si siguran da zaista želiš da obrišeš ovog igrača? Napomena: on NEĆE biti obrisan na serveru, već samo ovde.');">
+          <button class="btn btn-sm btn-outline-danger">🗑️</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

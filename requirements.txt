@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+jinja2
+tortoise-orm
+aiofiles
+python-multipart
+ipython
+nest_asyncio
+mcrcon
+itsdangerous
+bcrypt<4.1.0
+passlib>=1.7.4
+aerich
+tomli-w
+# dev
+colorlog
