@@ -69,6 +69,12 @@ async def set_home_from_current_position(playername: str) -> str:
         raise Exception("⚠️ Nije moguće dobiti koordinate i dimenziju igrača.")
 
     dimension, x, y, z = result
+
+    if dimension not in ["minecraft:overworld"]:
+        raise Exception(
+            f"❌ Dimenzija '{dimension}' nije podržana! Možete postaviti kuću samo u 'minecraft:overworld'."
+        )
+
     player, _ = await GamePlayer.get_or_create(name=playername)
     player.home_x = x
     player.home_y = y
