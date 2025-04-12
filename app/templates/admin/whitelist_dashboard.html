@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="/">Početna</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Administracija</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Whitelist Dashboard</li>
+  </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
 <h2>Whitelist</h2>
 <ul id="whitelist">
