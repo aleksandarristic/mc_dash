@@ -1,6 +1,7 @@
 import logging.config
 from pathlib import Path
 
+
 def configure_logging():
     # from app import settings  # Avoid circular import
 
@@ -54,11 +55,34 @@ def configure_logging():
             "handlers": ["console", "file_debug", "file_error"],
         },
         "loggers": {
+            "": {  # Root logger
+                "level": "DEBUG",
+                "handlers": ["console", "file_debug", "file_error"],
+            },
             "tortoise": {"level": "WARNING"},
             "aiosqlite": {"level": "WARNING"},
-            "uvicorn": {"level": "INFO"},
-            "uvicorn.error": {"level": "INFO"},
-            "uvicorn.access": {"level": "WARNING"},
+            "uvicorn": {"level": "INFO", "propagate": False},
+            "uvicorn.error": {
+                "level": "DEBUG",
+                "handlers": ["console", "file_debug", "file_error"],
+                "propagate": False,
+            },
+            "uvicorn.access": {"level": "WARNING", "propagate": False},
+            "starlette": {
+                "level": "WARNING",
+                "handlers": ["console", "file_debug", "file_error"],
+                "propagate": False,
+            },
+            "jinja2": {
+                "level": "ERROR",
+                "handlers": ["console", "file_debug", "file_error"],
+                "propagate": False,
+            },
+            "app": {
+                "level": "DEBUG",
+                "handlers": ["console", "file_debug", "file_error"],
+                "propagate": False,
+            },
         },
     }
 
