@@ -59,7 +59,7 @@
             <ul class="list-group list-group-flush">
             {% for p in players_today %}
                 <li class="list-group-item">
-                    {{ p.last_seen_time(format='%H:%M:%S') }}: {{ p.name }} <small class="text-muted">{{ player.last_seen_coords }}</small>
+                    {{ p.last_seen_time(format='%H:%M:%S') }}: {{ p.name }} <small class="text-muted">{{ player.last_seen_coords() }}</small>
                 </li>
             {% endfor %}
             </ul>
