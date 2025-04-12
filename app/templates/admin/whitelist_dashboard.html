@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Whitelist</h2>
+<ul id="whitelist">
+    {% for line in whitelist.splitlines() %}
+    <li>{{ line }} <button onclick="removeFrom('whitelist', '{{ line }}')">Remove</button></li>
+    {% endfor %}
+</ul>
+<input id="whitelist-name" placeholder="Player name" />
+<button onclick="addTo('whitelist')">Add to Whitelist</button>
+
+<h2 style="margin-top:2em;">Blacklist</h2>
+<ul id="blacklist">
+    {% for line in blacklist.splitlines() %}
+    <li>{{ line }} <button onclick="removeFrom('blacklist', '{{ line }}')">Remove</button></li>
+    {% endfor %}
+</ul>
+<input id="blacklist-name" placeholder="Player name" />
+<button onclick="addTo('blacklist')">Add to Blacklist</button>
+
+<script>
+async function addTo(listType) {
+    const input = document.getElementById(`${listType}-name`);
+    const player = input.value.trim();
+    if (!player) return;
+    const res = await fetch(`/admin/${listType}/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player })
+    });
+    const data = await res.json();
+    alert(data.result);
+    location.reload();
+}
+
+async function removeFrom(listType, player) {
+    const res = await fetch(`/admin/${listType}/remove`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player })
+    });
+    const data = await res.json();
+    alert(data.result);
+    location.reload();
+}
+</script>
+{% endblock %}

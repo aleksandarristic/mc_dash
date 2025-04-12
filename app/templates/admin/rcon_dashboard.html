@@ -1,0 +1,55 @@
+<!-- templates/admin/rcon_dashboard.html -->
+{% extends "base.html" %}
+{% block title %}RCON Dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock%}
+
+{% block content %}
+<h2>RCON Dashboard</h2>
+<div>
+    <input id="rcon-command" list="rcon-commands" style="width: 100%;" />
+    <datalist id="rcon-commands">
+        <option value="list">
+        <option value="say Hello, world!">
+        <option value="time set day">
+        <option value="gamemode creative">
+        <option value="tp @p 0 64 0">
+        <option value="weather clear">
+        <option value="effect give @p minecraft:speed 30 1 true">
+    </datalist>
+        
+    <br>
+    <button id="send-rcon">Send</button>
+</div>
+<pre id="rcon-output" style="margin-top: 1em; background: #222; color: #0f0; padding: 1em;"></pre>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    document.getElementById("send-rcon").addEventListener("click", async () => {
+        const cmd = document.getElementById("rcon-command").value;
+        const outputBox = document.getElementById("rcon-output");
+        outputBox.textContent += `> ${cmd}\n`; // echo command
+    
+        const res = await fetch("/admin/rcon/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ command: cmd })
+        });
+    
+        const data = await res.json();
+    
+        // Simulate line-by-line streaming
+        const lines = data.output?.split("\n") || ["No output."];
+        for (let line of lines) {
+            outputBox.textContent += `${line}\n`;
+            outputBox.scrollTop = outputBox.scrollHeight;
+            await new Promise(r => setTimeout(r, 50));  // Simulated stream delay
+        }
+    });
+</script>
+{% endblock %}    

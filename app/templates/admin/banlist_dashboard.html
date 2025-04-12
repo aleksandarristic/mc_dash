@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Ban Lista</h2>
+
+<ul id="banlist">
+    {% for line in banlist.splitlines() %}
+    <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
+    {% endfor %}
+</ul>
+
+<input id="ban-name" placeholder="Player name" />
+<button onclick="ban()">Banuj igrača</button>
+
+<script>
+async function ban() {
+    const input = document.getElementById("ban-name");
+    const player = input.value.trim();
+    if (!player) return;
+    const res = await fetch("/admin/banlist/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player })
+    });
+    const data = await res.json();
+    alert(data.result);
+    location.reload();
+}
+
+async function unban(player) {
+    const res = await fetch("/admin/banlist/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player })
+    });
+    const data = await res.json();
+    alert(data.result);
+    location.reload();
+}
+</script>
+{% endblock %}

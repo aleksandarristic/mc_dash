@@ -1,15 +1,20 @@
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Form, HTTPException, Request, Response
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from mcrcon import MCRcon
 from passlib.hash import bcrypt
+from pydantic import BaseModel
 from starlette import status
 
 from app.models import GamePlayer, User
+from app.settings import RCON_HOST, RCON_PASSWORD, RCON_PORT
 from app.user.auth import admin_required
 from app.utils import flash, redirect_back, render_template
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
@@ -258,16 +263,148 @@ async def gameplayer_detail(request: Request, player_id: int):
 
 @router.post("/set-password", name="admin_set_password")
 @admin_required
-async def set_password_for_user(request: Request, user_id: int = Form(...), password: str = Form(...), confirm_password: str = Form(...)):
+async def set_password_for_user(
+    request: Request,
+    user_id: int = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+):
     if password != confirm_password:
         flash(request, "Šifre se ne poklapaju!", "danger")
-        return RedirectResponse(request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(
+            request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND
+        )
 
     user = await User.get_or_none(id=user_id)
     if not user:
         flash(request, "Korisnik ne postoji.", "danger")
-        return RedirectResponse(request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND)
+        return RedirectResponse(
+            request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND
+        )
 
     await user.set_password(password)
-    flash(request, f"Nova šifra za korisnika \"{user.username}\" uspešno postavljena!", "success")
-    return RedirectResponse(request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND)
+    flash(
+        request,
+        f'Nova šifra za korisnika "{user.username}" uspešno postavljena!',
+        "success",
+    )
+    return RedirectResponse(
+        request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND
+    )
+
+
+class BanAction(BaseModel):
+    player: str
+
+
+@router.get("/banlist", name="admin_banlist")
+@admin_required
+async def banlist_dashboard(request: Request):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            banlist = rcon.command("banlist")
+    except Exception as e:
+        msg = f"Failed to fetch banlist: {e}"
+        logger.error(msg)
+        banlist = msg
+
+    return render_template(
+        "admin/banlist_dashboard.html",
+        request,
+        {"banlist": banlist},
+    )
+
+
+@router.post("/banlist/add", name="admin_banlist_add")
+@admin_required
+async def banlist_add(payload: BanAction):
+    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+        output = rcon.command(f"ban {payload.player}")
+    return JSONResponse({"result": output})
+
+
+@router.post("/banlist/remove", name="admin_banlist_remove")
+@admin_required
+async def banlist_remove(payload: BanAction):
+    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+        output = rcon.command(f"pardon {payload.player}")
+    return JSONResponse({"result": output})
+
+
+class PlayerAction(BaseModel):
+    player: str
+
+
+@router.get("/whitelist", name="admin_whitelist")
+@admin_required
+async def whitelist_dashboard(request: Request):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            whitelist = await rcon.command("whitelist list")
+            blacklist = await rcon.command("banlist")
+    except Exception as e:
+        msg = f"Failed to fetch whitelist: {e}"
+        logger.error(msg)
+        whitelist = msg
+        blacklist = msg
+    return templates.TemplateResponse(
+        "admin/whitelist_dashboard.html",
+        {"request": request, "whitelist": whitelist, "blacklist": blacklist},
+    )
+
+
+@router.post("/whitelist/add")
+@admin_required
+async def whitelist_add(payload: PlayerAction):
+    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+        output = rcon.command(f"whitelist add {payload.player}")
+    return JSONResponse({"result": output})
+
+
+@router.post("/whitelist/remove")
+@admin_required
+async def whitelist_remove(payload: PlayerAction):
+    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+        output = rcon.command(f"whitelist remove {payload.player}")
+    return JSONResponse({"result": output})
+
+
+@router.post("/blacklist/add")
+@admin_required
+async def blacklist_add(payload: PlayerAction):
+    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+        output = rcon.command(f"ban {payload.player}")
+    return JSONResponse({"result": output})
+
+
+@router.post("/blacklist/remove")
+@admin_required
+async def blacklist_remove(payload: PlayerAction):
+    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+        output = rcon.command(f"pardon {payload.player}")
+    return JSONResponse({"result": output})
+
+
+class RconCommand(BaseModel):
+    command: str
+
+
+@router.post("/rcon/send")
+@admin_required
+async def send_rcon_command(request: Request, payload: RconCommand):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            output = rcon.command(payload.command)
+        return JSONResponse({"output": output})
+    except Exception as e:
+        return JSONResponse({"output": f"Error: {str(e)}"})
+
+
+@router.get("/rcon", name='admin_rcon_dashboard')
+@admin_required
+async def rcon_dashboard(request: Request):
+    return render_template(
+        "admin/rcon_dashboard.html",
+        request,
+        {},
+    )
