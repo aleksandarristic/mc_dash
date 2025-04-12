@@ -254,3 +254,20 @@ async def gameplayer_detail(request: Request, player_id: int):
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
     return render_template("admin/gameplayer_detail.html", request, {"player": player})
+
+
+@router.post("/set-password", name="admin_set_password")
+@admin_required
+async def set_password_for_user(request: Request, user_id: int = Form(...), password: str = Form(...), confirm_password: str = Form(...)):
+    if password != confirm_password:
+        flash(request, "Šifre se ne poklapaju!", "danger")
+        return RedirectResponse(request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND)
+
+    user = await User.get_or_none(id=user_id)
+    if not user:
+        flash(request, "Korisnik ne postoji.", "danger")
+        return RedirectResponse(request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND)
+
+    await user.set_password(password)
+    flash(request, f"Nova šifra za korisnika \"{user.username}\" uspešno postavljena!", "success")
+    return RedirectResponse(request.url_for("admin_user_list"), status_code=status.HTTP_302_FOUND)

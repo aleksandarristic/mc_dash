@@ -78,6 +78,11 @@
           {% if u.is_admin %}🧍 Ukloni admin{% else %}👑 Postavi admin{% endif %}
         </button>
 
+        <!-- Set Password button -->
+        <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#setPasswordModal" data-user-id="{{ u.id }}" data-username="{{ u.username }}">
+          🔐 Promeni šifru
+        </button>
+
         <form method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}" class="d-inline"
               onsubmit="return confirm('Da li si 100% siguran da želiš da obrišeš ovog korisnika? Uvek možeš odabrati opciju IZBACI umesto brisanja.');">
           <button class="btn btn-sm btn-outline-danger">Obriši</button>
@@ -102,6 +107,47 @@
   </ul>
 </nav>
 {% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="setPasswordModal" tabindex="-1" aria-labelledby="setPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" action="/admin/set-password" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="setPasswordModalLabel">Set New Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="user_id" id="modal-user-id">
+        <p>Changing password for <strong id="modal-username"></strong></p>
+        <div class="mb-3">
+          <label class="form-label">New Password</label>
+          <input type="password" name="password" class="form-control" required minlength="8">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" name="confirm_password" class="form-control" required minlength="8">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Set Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  const modal = document.getElementById('setPasswordModal')
+  modal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget
+    const userId = button.getAttribute('data-user-id')
+    const username = button.getAttribute('data-username')
+    modal.querySelector('#modal-user-id').value = userId
+    modal.querySelector('#modal-username').textContent = username
+  })
+</script>
+
 
 <!-- 🔁 Toggle Script -->
 <script>
