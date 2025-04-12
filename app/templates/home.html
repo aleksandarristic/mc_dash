@@ -10,7 +10,7 @@
         <h2>🟢 Status servera</h2>
         <p>Status: <strong class="{{ 'text-success' if server_status == 'Online' else 'text-danger' }}">{{ server_status }}</strong></p>
         <div class="mb-4">
-            <h2>Igrači online</h2>
+            <h4>Igrači online</h2>
             <p>{{ players_online }} / {{ max_players }}</p>
         
             {% if online_names %}
@@ -59,7 +59,7 @@
             <ul class="list-group list-group-flush">
             {% for p in players_today %}
                 <li class="list-group-item">
-                {{ p.name }} — {{ p.last_seen_time(format='%H:%M:%S') }}
+                    {{ p.last_seen_time(format='%H:%M:%S') }}: {{ p.name }} <small class="text-muted">{{ player.last_seen_coords }}</small>
                 </li>
             {% endfor %}
             </ul>
@@ -95,7 +95,7 @@
 </div>
 
 <div class="mb-4">
-    <h2>📦 Preuzmi</h2>
+    <h2>📦 Modovi</h2>
     <ul class="list-group">
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <p class="strong">journeymap-forge-1.21.3-6.0.0-beta.31.jar</p>
