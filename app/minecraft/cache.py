@@ -99,7 +99,7 @@ async def poll_and_cache():
                 try:
                     dim_response = rcon.command(f"data get entity {name} Dimension")
                     # Example: 'Dimension: "minecraft:overworld"'
-                    dimension = dim_response.split(":")[1].strip().replace('"', "")
+                    dimension = dim_response.split(" ")[1].strip().replace('"', "")
                     player.last_seen_dimension = dimension
                     logger.debug(f"Player {name} is in dimension: {dimension}")
                 except Exception as e:
