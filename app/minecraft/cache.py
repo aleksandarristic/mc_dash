@@ -99,8 +99,10 @@ async def poll_and_cache():
                 try:
                     dim_response = rcon.command(f"data get entity {name} Dimension")
                     logger.debug(f"Dimension response for {name}: {dim_response}")
-                    # Example: 'Dimension: "minecraft:overworld"'
-                    dimension = dim_response.split(" ")[1].strip().replace('"', "")
+                    # Example: 'Vukvuk has the following entity data: "minecraft:overworld"'
+                    if "minecraft:" not in dim_response:
+                        raise ValueError(f"Invalid dimension format: {dim_response}")
+                    dimension = dim_response.split("\"")[1].strip().replace('"', "")
                     logger.debug(
                         f"Parsed dimension for {name}: {dimension}"
                     )
