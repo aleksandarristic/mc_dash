@@ -20,15 +20,6 @@
 <input id="whitelist-name" placeholder="Player name" />
 <button onclick="addTo('whitelist')">Add to Whitelist</button>
 
-<h2 style="margin-top:2em;">Blacklist</h2>
-<ul id="blacklist">
-    {% for line in blacklist.splitlines() %}
-    <li>{{ line }} <button onclick="removeFrom('blacklist', '{{ line }}')">Remove</button></li>
-    {% endfor %}
-</ul>
-<input id="blacklist-name" placeholder="Player name" />
-<button onclick="addTo('blacklist')">Add to Blacklist</button>
-
 <script>
 async function addTo(listType) {
     const input = document.getElementById(`${listType}-name`);

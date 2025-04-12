@@ -341,15 +341,13 @@ async def whitelist_dashboard(request: Request):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
             whitelist = rcon.command("whitelist list")
-            blacklist = rcon.command("banlist")
     except Exception as e:
         msg = f"Failed to fetch whitelist: {e}"
         logger.error(msg)
         whitelist = msg
-        blacklist = msg
     return templates.TemplateResponse(
         "admin/whitelist_dashboard.html",
-        {"request": request, "whitelist": whitelist, "blacklist": blacklist},
+        {"request": request, "whitelist": whitelist},
     )
 
 
@@ -369,22 +367,6 @@ async def whitelist_remove(payload: PlayerAction):
     return JSONResponse({"result": output})
 
 
-@router.post("/blacklist/add")
-@admin_required
-async def blacklist_add(payload: PlayerAction):
-    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
-        output = rcon.command(f"ban {payload.player}")
-    return JSONResponse({"result": output})
-
-
-@router.post("/blacklist/remove")
-@admin_required
-async def blacklist_remove(payload: PlayerAction):
-    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
-        output = rcon.command(f"pardon {payload.player}")
-    return JSONResponse({"result": output})
-
-
 class RconCommand(BaseModel):
     command: str
 
@@ -400,7 +382,7 @@ async def send_rcon_command(request: Request, payload: RconCommand):
         return JSONResponse({"output": f"Error: {str(e)}"})
 
 
-@router.get("/rcon", name='admin_rcon_dashboard')
+@router.get("/rcon", name="admin_rcon_dashboard")
 @admin_required
 async def rcon_dashboard(request: Request):
     return render_template(
