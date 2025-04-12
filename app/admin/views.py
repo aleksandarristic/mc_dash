@@ -340,8 +340,8 @@ class PlayerAction(BaseModel):
 async def whitelist_dashboard(request: Request):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
-            whitelist = await rcon.command("whitelist list")
-            blacklist = await rcon.command("banlist")
+            whitelist = rcon.command("whitelist list")
+            blacklist = rcon.command("banlist")
     except Exception as e:
         msg = f"Failed to fetch whitelist: {e}"
         logger.error(msg)
