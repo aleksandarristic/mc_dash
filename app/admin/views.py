@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Form, HTTPException, Request, Response
@@ -10,6 +11,7 @@ from pydantic import BaseModel
 from starlette import status
 
 from app.admin.utils import parse_banlist_response, parse_whitelist_response
+from app.minecraft.cache import get_server_status
 from app.models import GamePlayer, ServerSnapshot, User
 from app.settings import RCON_HOST, RCON_PASSWORD, RCON_PORT
 from app.user.auth import admin_required
@@ -315,8 +317,18 @@ async def banlist_dashboard(request: Request):
         logger.error(msg)
         number, details = 0, {"users": [], "uuids": [], "ips": []}
 
-    latest = await ServerSnapshot.filter(status="online").order_by("-timestamp").first()
-    online_players = [{"name": p} for p in latest.player_names] if (latest and latest.player_names) else []
+    status = get_server_status()
+
+    now = datetime.now(timezone.utc)
+    start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    players_today = await GamePlayer.filter(last_seen__gte=start_of_day).order_by(
+        "last_seen"
+    )
+
+    online_usernames = status.get("player_names", [])
+    online_players = await GamePlayer.filter(name__in=online_usernames) if online_usernames else []
+
 
     return render_template(
         "admin/banlist_dashboard.html",
@@ -325,6 +337,7 @@ async def banlist_dashboard(request: Request):
             "number": number,
             "banlist": details,
             "online_players": online_players,
+            "players_today": players_today,
         },
     )
 

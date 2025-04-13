@@ -23,15 +23,6 @@ async def homepage(request: Request):
 
     # Get live server status from in-memory cache
     status = get_server_status()
-    # mock status for testing
-    # status = {
-    #     "status": "Online",
-    #     "players_online": 1,
-    #     "max_players": 20,
-    #     "player_names": ["leka"],
-    #     "timestamp": datetime.utcnow(),
-    # }
-    
 
     # Static server info (config-based)
     server_info = {
@@ -49,7 +40,6 @@ async def homepage(request: Request):
     )
 
     player_info_map = {player.name: player for player in players_today}
-
     snapshots = await ServerSnapshot.all().order_by("-timestamp").limit(1)
 
     context = {
