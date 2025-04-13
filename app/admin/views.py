@@ -9,6 +9,7 @@ from passlib.hash import bcrypt
 from pydantic import BaseModel
 from starlette import status
 
+from app.admin.utils import parse_whitelist_response
 from app.models import GamePlayer, User
 from app.settings import RCON_HOST, RCON_PASSWORD, RCON_PORT
 from app.user.auth import admin_required
@@ -340,14 +341,18 @@ class PlayerAction(BaseModel):
 async def whitelist_dashboard(request: Request):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
-            whitelist = rcon.command("whitelist list")
+            whitelist_response = rcon.command("whitelist list")
+            whitelist = parse_whitelist_response(whitelist_response)
     except Exception as e:
         msg = f"Failed to fetch whitelist: {e}"
         logger.error(msg)
-        whitelist = msg
-    return templates.TemplateResponse(
+        flash(request, msg, "error")
+        whitelist = []
+
+    return render_template(
         "admin/whitelist_dashboard.html",
-        {"request": request, "whitelist": whitelist},
+        request,
+        {"whitelist": whitelist},
     )
 
 
