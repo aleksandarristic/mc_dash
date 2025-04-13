@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
 {% block title %}Minecraft Server{% endblock %}
 
 {% block navbar %}{% endblock %}
@@ -18,24 +20,7 @@
             <ul class="list-group mb-3">
                 {% for player in online_players %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        <span class="badge bg-success me-2">Online</span> {{ player.name }}
-                        {% if player.dimension %}
-                        <small class="ms-2 text-muted">({{ player.dimension }})</small>
-                        {% endif %}
-                    </span>
-                    {% if user.is_admin %}
-                    <div class="d-flex gap-2">
-                        <form method="POST" action="{{ url_for('admin_ban_player') }}">
-                            <input type="hidden" name="player" value="{{ player.name }}">
-                            <button class="btn btn-sm btn-warning" type="submit">Ban</button>
-                        </form>
-                        <form method="POST" action="{{ url_for('admin_kick_player') }}">
-                            <input type="hidden" name="player" value="{{ player.name }}">
-                            <button class="btn btn-sm btn-secondary" type="submit">Kick</button>
-                        </form>
-                    </div>
-                    {% endif %}
+                    {{ render_player(player, include_kick=True, tag="Online") }}
                 </li>
                 {% endfor %}
             </ul>
@@ -74,20 +59,9 @@
             <ul class="list-group mb-3">
                 {% for player in players_today %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        <span class="badge bg-warning me-2">Player</span> {{ player.name }}
-                        {% if player.dimension %}
-                        <small class="ms-2 text-muted">({{ player.dimension }})</small>
-                        {% endif %}
-                    </span>
-                    {% if user.is_admin %}
-                    <div class="d-flex gap-2">
-                        <form method="POST" action="{{ url_for('admin_ban_player') }}">
-                            <input type="hidden" name="player" value="{{ player.name }}">
-                            <button class="btn btn-sm btn-warning" type="submit">Ban</button>
-                        </form>
-                    </div>
-                    {% endif %}
+
+                    {{ render_player(player, include_kick=False, include_coords=True, include_time=True, tag="Player") }}
+
                 </li>
                 {% endfor %}
             </ul>

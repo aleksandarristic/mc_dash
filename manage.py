@@ -63,6 +63,11 @@ Utils:
 
     asyncio.run(prepare())
     IPython.start_ipython(argv=[], user_ns=namespace, banner1=banner)
+    try:
+        asyncio.run(Tortoise.close_connections())
+    except Exception as e:
+        print(f"❌ Error closing Tortoise connections: {e}")
+        
 
 
 @with_db
