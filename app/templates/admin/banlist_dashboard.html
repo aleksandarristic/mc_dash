@@ -11,70 +11,103 @@
 {% endblock %}
 
 {% block content %}
-<h2>Ban Lista</h2>
+<h2 class="mt-4">Ban Lista</h2>
 
-
-Banovani igrači:
+<h4 class="mt-4">Banovani igrači</h4>
 {% if banlist and banlist['users'] %}
-<ul id="banlist-users">
+<ul id="banlist-users" class="list-group mb-3">
     {% for line in banlist['users'] %}
-    <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            <span class="badge bg-secondary me-2">Username</span> {{ line.identifier }}<br>
+            <small class="text-muted">{{ line.message }} — {{ line.banned_by }}</small>
+        </span>
+        <form method="POST" action="{{ url_for('admin_banlist_remove') }}">
+            <input type="hidden" name="player" value="{{ line.identifier }}">
+            <button class="btn btn-sm btn-danger" type="submit">Unbanuj</button>
+        </form>
+    </li>
     {% endfor %}
 </ul>
 {% else %}
-<p>Lista je prazna.</p>
+<p class="text-muted">Lista je prazna.</p>
 {% endif %}
 
-Banovane IP adrese:
+<h4>Banovane IP adrese</h4>
 {% if banlist and banlist['ips'] %}
-<ul id="banlist-ips">
+<ul id="banlist-ips" class="list-group mb-3">
     {% for line in banlist['ips'] %}
-    <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            <span class="badge bg-info text-dark me-2">IP</span> {{ line.identifier }}<br>
+            <small class="text-muted">{{ line.message }} — {{ line.banned_by }}</small>
+        </span>
+        <form method="POST" action="{{ url_for('admin_banlist_remove') }}">
+            <input type="hidden" name="player" value="{{ line.identifier }}">
+            <button class="btn btn-sm btn-danger" type="submit">Unbanuj</button>
+        </form>
+    </li>
     {% endfor %}
 </ul>
 {% else %}
-<p>Lista je prazna.</p>
+<p class="text-muted">Lista je prazna.</p>
 {% endif %}
 
-Banovani ID-jevi:
+<h4>Banovani ID-jevi (UUID)</h4>
 {% if banlist and banlist['uuids'] %}
-<ul id="banlist-ids">
+<ul id="banlist-ids" class="list-group mb-3">
     {% for line in banlist['uuids'] %}
-    <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            <span class="badge bg-warning text-dark me-2">UUID</span> {{ line.identifier }}<br>
+            <small class="text-muted">{{ line.message }} — {{ line.banned_by }}</small>
+        </span>
+        <form method="POST" action="{{ url_for('admin_banlist_remove') }}">
+            <input type="hidden" name="player" value="{{ line.identifier }}">
+            <button class="btn btn-sm btn-danger" type="submit">Unbanuj</button>
+        </form>
+    </li>
     {% endfor %}
 </ul>
 {% else %}
-<p>Lista je prazna.</p>
+<p class="text-muted">Lista je prazna.</p>
 {% endif %}
 
+<hr>
 
-<input id="ban-name" placeholder="Player name" />
-<button onclick="ban()">Banuj igrača</button>
+<h4 class="mt-4">Dodaj novog igrača na ban listu</h4>
+<form method="POST" action="{{ url_for('admin_banlist_add') }}" class="d-flex gap-2 my-3">
+    <input id="ban-name" name="player" class="form-control" placeholder="Ime igrača" required>
+    <button class="btn btn-primary" type="submit">Banuj igrača</button>
+</form>
 
-<script>
-async function ban() {
-    const input = document.getElementById("ban-name");
-    const player = input.value.trim();
-    if (!player) return;
-    const res = await fetch("/admin/banlist/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player })
-    });
-    const data = await res.json();
-    alert(data.result);
-    location.reload();
-}
+<hr>
 
-async function unban(player) {
-    const res = await fetch("/admin/banlist/remove", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player })
-    });
-    const data = await res.json();
-    alert(data.result);
-    location.reload();
-}
-</script>
+<h4 class="mt-4">Online igrači</h4>
+{% if online_players %}
+<ul class="list-group mb-3">
+    {% for player in online_players %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+            <span class="badge bg-success me-2">Online</span> {{ player.name }}
+            {% if player.dimension %}
+            <small class="ms-2 text-muted">({{ player.dimension }})</small>
+            {% endif %}
+        </span>
+        <div class="d-flex gap-2">
+            <form method="POST" action="{{ url_for('admin_banlist_add') }}">
+                <input type="hidden" name="player" value="{{ player.name }}">
+                <button class="btn btn-sm btn-warning" type="submit">Ban</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin_kick_player') }}">
+                <input type="hidden" name="player" value="{{ player.name }}">
+                <button class="btn btn-sm btn-secondary" type="submit">Kick</button>
+            </form>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="text-muted">Nema igrača trenutno online.</p>
+{% endif %}
 {% endblock %}
