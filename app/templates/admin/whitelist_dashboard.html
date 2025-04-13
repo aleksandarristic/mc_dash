@@ -10,37 +10,43 @@
 </nav>
 {% endblock %}
 
-<div id="flash-container">
-    {% if flash %}
-    <div class="container mt-3">
-      <div class="alert alert-{{ flash.category }} alert-dismissible fade show" role="alert">
-        {{ flash.message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    </div>
-  {% endif %}
-</div>
-
-
 {% block content %}
-<h2>Whitelist</h2>
+<div class="container mt-4">
+  {% if flash %}
+  <div class="alert alert-{{ flash.category }} alert-dismissible fade show" role="alert">
+    {{ flash.message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endif %}
 
-<form method="post" action="{{ url_for('admin_whitelist_add') }}" style="margin-bottom: 2em;">
-    <label for="player">Add player to whitelist:</label>
-    <input type="text" name="player" id="player" required>
-    <button type="submit">Add</button>
-</form>
+  <h2 class="mb-4">Whitelist</h2>
 
-<ul id="whitelist">
+  <form method="post" action="{{ url_for('admin_whitelist_add') }}" class="row g-2 align-items-center mb-4">
+    <div class="col-auto">
+      <label for="player" class="col-form-label">Dodaj igrača:</label>
+    </div>
+    <div class="col">
+      <input type="text" name="player" id="player" class="form-control" placeholder="Ime igrača" required>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">Dodaj</button>
+    </div>
+  </form>
+
+  {% if whitelist %}
+  <ul id="whitelist" class="list-group">
     {% for player in whitelist %}
-    <li>
-        {{ player }}
-        <form method="post" action="{{ url_for('admin_whitelist_remove' )}}" style="display: inline;">
-            <input type="hidden" name="player" value="{{ player }}">
-            <button type="submit">Remove</button>
-        </form>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <span>{{ player }}</span>
+      <form method="post" action="{{ url_for('admin_whitelist_remove') }}">
+        <input type="hidden" name="player" value="{{ player }}">
+        <button type="submit" class="btn btn-sm btn-danger">Ukloni</button>
+      </form>
     </li>
     {% endfor %}
-</ul>
-
+  </ul>
+  {% else %}
+  <p class="text-muted">Whitelist je trenutno prazan.</p>
+  {% endif %}
+</div>
 {% endblock %}
