@@ -69,11 +69,10 @@ async def teleport_player_home(request: Request):
         result = await teleport_home(game_player.name)
         logger.debug(f"Teleport result: \"{result}\"")
         if "No entity was found" in result:
-            return JSONResponse({"success": False, "message": result})
+            return JSONResponse({"success": False, "message": f'Greška! Da li je "{user.username}" online?'})
         response = {"success": True, "message": result}
     except Exception as e:
-        result = str(e)
-        response = {"success": False, "message": result}
+        response = {"success": False, "message": f"{e}"}
 
     return JSONResponse(response)
 
