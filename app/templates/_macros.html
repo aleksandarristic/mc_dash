@@ -15,31 +15,31 @@
 {% if user.is_admin %}
 <div class="d-flex gap-2">
   {% if include_kick %}
-  {{ kick_form(player) }}
+  {{ kick_form(player, request=request) }}
   {% endif %}
-  {{ ban_form(player) }}
-  {{ remove_whitelist_form(player) }}
+  {{ ban_form(player, request=request) }}
+  {{ remove_whitelist_form(player, request=request) }}
 </div>
 {% endif %}
 {% endmacro %}
 
-{% macro ban_form(player) %}
+{% macro ban_form(player, request) %}
 <form method="POST" action="{{ url_for('admin_ban_player') }}">
   <input type="hidden" name="player" value="{{ player.name }}">
-  <button class="btn btn-sm btn-warning" type="submit" onclick="return confirm('Da li si siguran da želiš da banuješ {{ player.name }}?');">Ban</button>
+  <button class="btn btn-sm btn-warning" type="submit" onclick="return confirm('Da li si siguran da želiš da banuješ {{ player.name|escapejs }}?');">Ban</button>
 </form>
 {% endmacro %}
 
-{% macro kick_form(player) %}
+{% macro kick_form(player, request) %}
 <form method="POST" action="{{ url_for('admin_kick_player') }}">
   <input type="hidden" name="player" value="{{ player.name }}">
-  <button class="btn btn-sm btn-secondary" type="submit" onclick="return confirm('Da li si siguran da želiš da kikuješ {{ player.name }}?');">Kick</button>
+  <button class="btn btn-sm btn-secondary" type="submit" onclick="return confirm('Da li si siguran da želiš da kikuješ {{ player.name|escapejs }}?');">Kick</button>
 </form>
 {% endmacro %}
 
-{% macro remove_whitelist_form(player) %}
+{% macro remove_whitelist_form(player, request) %}
 <form method="POST" action="{{ url_for('admin_remove_whitelist') }}">
   <input type="hidden" name="player" value="{{ player.name }}">
-  <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Da li si siguran da želiš da skineš {{ player.name }} sa whiteliste?');">Skini sa whiteliste</button>
+  <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Da li si siguran da želiš da skineš {{ player.name|escapejs }} sa whiteliste?');">Skini sa whiteliste</button>
 </form>
 {% endmacro %}
