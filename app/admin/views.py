@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from starlette import status
 
 from app.admin.utils import parse_banlist_response, parse_whitelist_response
-from app.models import GamePlayer, User
+from app.models import GamePlayer, ServerSnapshot, User
 from app.settings import RCON_HOST, RCON_PASSWORD, RCON_PORT
 from app.user.auth import admin_required
 from app.utils import flash, redirect_back, render_template
@@ -315,10 +315,17 @@ async def banlist_dashboard(request: Request):
         logger.error(msg)
         number, details = 0, {"users": [], "uuids": [], "ips": []}
 
+    latest = await ServerSnapshot.filter(status="online").order_by("-timestamp").first()
+    online_players = [{"name": p} for p in latest.player_names] if (latest and latest.player_names) else []
+
     return render_template(
         "admin/banlist_dashboard.html",
         request,
-        {"number": number, "banlist": details},
+        {
+            "number": number,
+            "banlist": details,
+            "online_players": online_players,
+        },
     )
 
 
