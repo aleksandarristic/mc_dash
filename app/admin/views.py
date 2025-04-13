@@ -305,13 +305,15 @@ async def banlist_dashboard(request: Request):
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
             banlist = rcon.command("banlist")
             number, details = parse_banlist_response(banlist)
-            if number != len(details.get('users', [])) + len(details.get('uuids', [])) + len(details.get('ips', [])):
+            if number != len(details.get("users", [])) + len(
+                details.get("uuids", [])
+            ) + len(details.get("ips", [])):
                 logger.warning(f"Count mismatch: {number} != {len(details)}")
 
     except Exception as e:
         msg = f"Failed to fetch banlist: {e}"
         logger.error(msg)
-        number, details = 0, {'users': [], 'uuids': [], 'ips': []}
+        number, details = 0, {"users": [], "uuids": [], "ips": []}
 
     return render_template(
         "admin/banlist_dashboard.html",
@@ -320,7 +322,7 @@ async def banlist_dashboard(request: Request):
     )
 
 
-@router.post("/banlist/add", name="admin_banlist_add")
+@router.post("/banlist/add", name="admin_ban_player")
 @admin_required
 async def ban_player(request: Request, player: str = Form(...)):
     try:
@@ -332,13 +334,10 @@ async def ban_player(request: Request, player: str = Form(...)):
         output = f"Error: {e}"
         flash(request, output, "error")
 
-    return redirect_back(
-        request,
-        request.url_for("admin_banlist")
-    )
+    return redirect_back(request, request.url_for("admin_banlist"))
 
 
-@router.post("/banlist/remove", name="admin_banlist_remove")
+@router.post("/banlist/remove", name="admin_unban_player")
 @admin_required
 async def unban_player(request: Request, player: str = Form(...)):
     try:
@@ -349,14 +348,11 @@ async def unban_player(request: Request, player: str = Form(...)):
         logger.error(f"Failed to pardon {player}: {e}")
         output = f"Error: {e}"
         flash(request, output, "error")
-    
-    return redirect_back(
-        request,
-        request.url_for("admin_banlist")
-    )
+
+    return redirect_back(request, request.url_for("admin_banlist"))
 
 
-@router.post("/banlist/add-ip", name="admin_banlist_add_ip")
+@router.post("/banlist/add-ip", name="admin_ban_ip")
 async def ban_ip(request: Request, ip: str = Form(...)):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
@@ -367,13 +363,10 @@ async def ban_ip(request: Request, ip: str = Form(...)):
         output = f"Error: {e}"
         flash(request, output, "error")
 
-    return redirect_back(
-        request,
-        request.url_for("admin_banlist")
-    )
+    return redirect_back(request, request.url_for("admin_banlist"))
 
 
-@router.post("/banlist/remove-ip", name="admin_banlist_remove_ip")
+@router.post("/banlist/remove-ip", name="admin_unban_ip")
 async def unban_ip(request: Request, ip: str = Form(...)):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
@@ -383,12 +376,23 @@ async def unban_ip(request: Request, ip: str = Form(...)):
         logger.error(f"Failed to pardon {ip}: {e}")
         output = f"Error: {e}"
         flash(request, output, "error")
-    
-    return redirect_back(
-        request,
-        request.url_for("admin_banlist")
-    )
 
+    return redirect_back(request, request.url_for("admin_banlist"))
+
+
+@router.post("/banlist/kick", name="admin_kick_player")
+@admin_required
+async def kick_player(request: Request, player: str = Form(...)):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            output = rcon.command(f"kick {player}")
+            flash(request, f"Player {player} kicked: {output}", "success")
+    except Exception as e:
+        logger.error(f"Failed to kick {player}: {e}")
+        output = f"Error: {e}"
+        flash(request, output, "error")
+
+    return redirect_back(request, request.url_for("admin_banlist"))
 
 
 class PlayerAction(BaseModel):

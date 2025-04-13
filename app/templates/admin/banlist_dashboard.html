@@ -22,7 +22,7 @@
             <span class="badge bg-secondary me-2">Username</span> {{ line.identifier }}<br>
             <small class="text-muted">{{ line.message }} — {{ line.banned_by }}</small>
         </span>
-        <form method="POST" action="{{ url_for('admin_banlist_remove') }}">
+        <form method="POST" action="{{ url_for('admin_unban_player') }}">
             <input type="hidden" name="player" value="{{ line.identifier }}">
             <button class="btn btn-sm btn-danger" type="submit">Unbanuj</button>
         </form>
@@ -41,7 +41,7 @@
             <span class="badge bg-info text-dark me-2">IP</span> {{ line.identifier }}<br>
             <small class="text-muted">{{ line.message }} — {{ line.banned_by }}</small>
         </span>
-        <form method="POST" action="{{ url_for('admin_ip_unban') }}">
+        <form method="POST" action="{{ url_for('admin_unban_ip') }}">
             <input type="hidden" name="ip" value="{{ line.identifier }}">
             <button class="btn btn-sm btn-danger" type="submit">Unbanuj IP</button>
         </form>
@@ -53,7 +53,7 @@
 {% endif %}
 
 <h5>Banuj IP adresu</h5>
-<form method="POST" action="{{ url_for('admin_ip_ban') }}" class="d-flex gap-2 my-3">
+<form method="POST" action="{{ url_for('admin_ban_ip') }}" class="d-flex gap-2 my-3">
     <input id="ban-ip" name="ip" class="form-control" placeholder="IP adresa" required>
     <button class="btn btn-primary" type="submit">Banuj IP</button>
 </form>
@@ -68,7 +68,7 @@
             <span class="badge bg-warning text-dark me-2">UUID</span> {{ line.identifier }}<br>
             <small class="text-muted">{{ line.message }} — {{ line.banned_by }}</small>
         </span>
-        <form method="POST" action="{{ url_for('admin_banlist_remove') }}">
+        <form method="POST" action="{{ url_for('admin_unban_player') }}">
             <input type="hidden" name="player" value="{{ line.identifier }}">
             <button class="btn btn-sm btn-danger" type="submit">Unbanuj</button>
         </form>
@@ -81,8 +81,8 @@
 
 <hr>
 
-<h4 class="mt-4">Dodaj novog igrača na ban listu</h4>
-<form method="POST" action="{{ url_for('admin_banlist_add') }}" class="d-flex gap-2 my-3">
+<h4 class="mt-4">Banuj igrača...</h4>
+<form method="POST" action="{{ url_for('admin_ban_player') }}" class="d-flex gap-2 my-3">
     <input id="ban-name" name="player" class="form-control" placeholder="Ime igrača" required>
     <button class="btn btn-primary" type="submit">Banuj igrača</button>
 </form>
@@ -101,7 +101,7 @@
             {% endif %}
         </span>
         <div class="d-flex gap-2">
-            <form method="POST" action="{{ url_for('admin_banlist_add') }}">
+            <form method="POST" action="{{ url_for('admin_ban_player') }}">
                 <input type="hidden" name="player" value="{{ player.name }}">
                 <button class="btn btn-sm btn-warning" type="submit">Ban</button>
             </form>
