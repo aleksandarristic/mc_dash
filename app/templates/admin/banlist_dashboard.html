@@ -13,11 +13,40 @@
 {% block content %}
 <h2>Ban Lista</h2>
 
-<ul id="banlist">
-    {% for line in banlist.splitlines() %}
+
+Banovani igrači:
+{% if banlist and banlist['users'] %}
+<ul id="banlist-users">
+    {% for line in banlist['users'] %}
     <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
     {% endfor %}
 </ul>
+{% else %}
+<p>Lista je prazna.</p>
+{% endif %}
+
+Banovane IP adrese:
+{% if banlist and banlist['ip'] %}
+<ul id="banlist-ips">
+    {% for line in banlist['ip'] %}
+    <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Lista je prazna.</p>
+{% endif %}
+
+Banovani ID-jevi:
+{% if banlist and banlist['ids'] %}
+<ul id="banlist-ids">
+    {% for line in banlist['ids'] %}
+    <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Lista je prazna.</p>
+{% endif %}
+
 
 <input id="ban-name" placeholder="Player name" />
 <button onclick="ban()">Banuj igrača</button>
