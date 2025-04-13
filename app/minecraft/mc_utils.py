@@ -102,7 +102,7 @@ async def teleport_home(player_name: str) -> str:
         x=player.home_x,
         y=player.home_y,
         z=player.home_z,
-        dimension="minecraft:overworld",
+        dimension=player.home_dimension,
     )
 
 
