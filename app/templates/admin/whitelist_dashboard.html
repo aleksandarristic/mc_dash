@@ -10,10 +10,22 @@
 </nav>
 {% endblock %}
 
+<div id="flash-container">
+    {% if flash %}
+    <div class="container mt-3">
+      <div class="alert alert-{{ flash.category }} alert-dismissible fade show" role="alert">
+        {{ flash.message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+  {% endif %}
+  </div>
+
+
 {% block content %}
 <h2>Whitelist</h2>
 <ul id="whitelist">
-    {% for line in whitelist.splitlines() %}
+    {% for line in whitelist %}
     <li>{{ line }} <button onclick="removeFrom('whitelist', '{{ line }}')">Remove</button></li>
     {% endfor %}
 </ul>
