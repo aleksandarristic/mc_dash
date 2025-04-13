@@ -305,36 +305,13 @@ async def banlist_dashboard(request: Request):
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
             banlist = rcon.command("banlist")
             number, details = parse_banlist_response(banlist)
-            if number != len(details):
+            if number != len(details.get('users', [])) + len(details.get('uuids', [])) + len(details.get('ips', [])):
                 logger.warning(f"Count mismatch: {number} != {len(details)}")
 
     except Exception as e:
         msg = f"Failed to fetch banlist: {e}"
         logger.error(msg)
         number, details = 0, {'users': [], 'uuids': [], 'ips': []}
-
-    # mock
-    # details = [
-    #     {
-    #         "identifier": "7415a011-6c5f-4871-adc1-9e32d8da62e8",
-    #         "type": "uuid",
-    #         "banned_by": "Rcon",
-    #         "message": "Banned by an operator.",
-    #     },
-    #     {
-    #         "identifier": "dBFlexi01",
-    #         "type": "username",
-    #         "banned_by": "Rcon",
-    #         "message": "Banned by an operator.",
-    #     },
-    #     {
-    #         "identifier": "156.253.227.129",
-    #         "type": "ip",
-    #         "banned_by": "Rcon",
-    #         "message": "Banned by an operator.",
-    #     },
-    # ]
-    # number = 3
 
     return render_template(
         "admin/banlist_dashboard.html",

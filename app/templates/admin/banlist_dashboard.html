@@ -26,9 +26,9 @@ Banovani igrači:
 {% endif %}
 
 Banovane IP adrese:
-{% if banlist and banlist['ip'] %}
+{% if banlist and banlist['ips'] %}
 <ul id="banlist-ips">
-    {% for line in banlist['ip'] %}
+    {% for line in banlist['ips'] %}
     <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
     {% endfor %}
 </ul>
@@ -37,9 +37,9 @@ Banovane IP adrese:
 {% endif %}
 
 Banovani ID-jevi:
-{% if banlist and banlist['ids'] %}
+{% if banlist and banlist['uuids'] %}
 <ul id="banlist-ids">
-    {% for line in banlist['ids'] %}
+    {% for line in banlist['uuids'] %}
     <li>{{ line }} <button onclick="unban('{{ line }}')">Unbanuj</button></li>
     {% endfor %}
 </ul>
