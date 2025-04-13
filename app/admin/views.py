@@ -322,7 +322,7 @@ async def banlist_dashboard(request: Request):
 
 @router.post("/banlist/add", name="admin_banlist_add")
 @admin_required
-async def banlist_add(request: Request, player: str = Form(...)):
+async def ban_player(request: Request, player: str = Form(...)):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
             output = rcon.command(f"ban {player}")
@@ -340,7 +340,7 @@ async def banlist_add(request: Request, player: str = Form(...)):
 
 @router.post("/banlist/remove", name="admin_banlist_remove")
 @admin_required
-async def banlist_remove(request: Request, player: str = Form(...)):
+async def unban_player(request: Request, player: str = Form(...)):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
             output = rcon.command(f"pardon {player}")
@@ -354,6 +354,41 @@ async def banlist_remove(request: Request, player: str = Form(...)):
         request,
         request.url_for("admin_banlist")
     )
+
+
+@router.post("/banlist/add-ip", name="admin_banlist_add_ip")
+async def ban_ip(request: Request, ip: str = Form(...)):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            output = rcon.command(f"ban-ip {ip}")
+            flash(request, f"Banlist updated: {output}", "success")
+    except Exception as e:
+        logger.error(f"Failed to ban IP {ip}: {e}")
+        output = f"Error: {e}"
+        flash(request, output, "error")
+
+    return redirect_back(
+        request,
+        request.url_for("admin_banlist")
+    )
+
+
+@router.post("/banlist/remove-ip", name="admin_banlist_remove_ip")
+async def unban_ip(request: Request, ip: str = Form(...)):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            output = rcon.command(f"pardon-ip {ip}")
+            flash(request, f"Banlist updated: {output}", "success")
+    except Exception as e:
+        logger.error(f"Failed to pardon {ip}: {e}")
+        output = f"Error: {e}"
+        flash(request, output, "error")
+    
+    return redirect_back(
+        request,
+        request.url_for("admin_banlist")
+    )
+
 
 
 class PlayerAction(BaseModel):
