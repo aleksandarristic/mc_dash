@@ -20,7 +20,7 @@
             <ul class="list-group mb-3">
                 {% for player in online_players %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ macros.render_player(player, user=user include_kick=True, tag="Online") }}
+                    {{ macros.render_player(player, user=user, include_kick=True, tag="Online") }}
                 </li>
                 {% endfor %}
             </ul>
