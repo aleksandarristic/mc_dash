@@ -14,7 +14,7 @@ def render_template(template_name: str, request: Request, context: dict) -> Resp
     return templates.TemplateResponse(template_name, context)
 
 
-def redirect_back(request: Request, fallback_url: str = "/"):
+def redirect_back(request: Request, fallback_url: str = "/", status_code: int = status.HTTP_302_FOUND) -> RedirectResponse:
     ref = request.headers.get("referer")
     return RedirectResponse(ref or fallback_url, status_code=status.HTTP_302_FOUND)
 

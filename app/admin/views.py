@@ -334,8 +334,7 @@ async def banlist_add(request: Request, player: str = Form(...)):
 
     return redirect_back(
         request,
-        request.url_for("admin_banlist"),
-        status_code=status.HTTP_302_FOUND,
+        request.url_for("admin_banlist")
     )
 
 
@@ -353,8 +352,7 @@ async def banlist_remove(request: Request, player: str = Form(...)):
     
     return redirect_back(
         request,
-        request.url_for("admin_banlist"),
-        status_code=status.HTTP_302_FOUND,
+        request.url_for("admin_banlist")
     )
 
 
