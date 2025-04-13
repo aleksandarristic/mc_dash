@@ -19,43 +19,28 @@
       </div>
     </div>
   {% endif %}
-  </div>
+</div>
 
 
 {% block content %}
 <h2>Whitelist</h2>
+
+<form method="post" action="{{ url_for('admin_whitelist_add') }}" style="margin-bottom: 2em;">
+    <label for="player">Add player to whitelist:</label>
+    <input type="text" name="player" id="player" required>
+    <button type="submit">Add</button>
+</form>
+
 <ul id="whitelist">
-    {% for line in whitelist %}
-    <li>{{ line }} <button onclick="removeFrom('whitelist', '{{ line }}')">Remove</button></li>
+    {% for player in whitelist %}
+    <li>
+        {{ player }}
+        <form method="post" action="{{ url_for('admin_whitelist_remove' )}}" style="display: inline;">
+            <input type="hidden" name="player" value="{{ player }}">
+            <button type="submit">Remove</button>
+        </form>
+    </li>
     {% endfor %}
 </ul>
-<input id="whitelist-name" placeholder="Player name" />
-<button onclick="addTo('whitelist')">Add to Whitelist</button>
 
-<script>
-async function addTo(listType) {
-    const input = document.getElementById(`${listType}-name`);
-    const player = input.value.trim();
-    if (!player) return;
-    const res = await fetch(`/admin/${listType}/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player })
-    });
-    const data = await res.json();
-    alert(data.result);
-    location.reload();
-}
-
-async function removeFrom(listType, player) {
-    const res = await fetch(`/admin/${listType}/remove`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player })
-    });
-    const data = await res.json();
-    alert(data.result);
-    location.reload();
-}
-</script>
 {% endblock %}

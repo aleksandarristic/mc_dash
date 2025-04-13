@@ -349,6 +349,9 @@ async def whitelist_dashboard(request: Request):
         flash(request, msg, "error")
         whitelist = []
 
+    # mock
+    # whitelist = ["player1", "player2", "player3"]
+
     return render_template(
         "admin/whitelist_dashboard.html",
         request,
@@ -356,20 +359,38 @@ async def whitelist_dashboard(request: Request):
     )
 
 
-@router.post("/whitelist/add")
+@router.post("/whitelist/add", name="admin_whitelist_add")
 @admin_required
-async def whitelist_add(payload: PlayerAction):
-    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
-        output = rcon.command(f"whitelist add {payload.player}")
-    return JSONResponse({"result": output})
+async def whitelist_add_form(request: Request, player: str = Form(...)):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            result = rcon.command(f"whitelist add {player}")
+        flash(request, f"Whitelist updated: {result}", "success")
+    except Exception as e:
+        logger.error(f"Failed to add {player} to whitelist: {e}")
+        result = f"Error: {e}"
+        flash(request, result, "error")
+
+    return RedirectResponse(
+        request.url_for("admin_whitelist"),
+        status_code=status.HTTP_302_FOUND,
+    )
 
 
-@router.post("/whitelist/remove")
+@router.post("/whitelist/remove", name="admin_whitelist_remove")
 @admin_required
-async def whitelist_remove(payload: PlayerAction):
-    with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
-        output = rcon.command(f"whitelist remove {payload.player}")
-    return JSONResponse({"result": output})
+async def whitelist_remove_form(request: Request, player: str = Form(...)):
+    try:
+        with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
+            result = rcon.command(f"whitelist remove {player}")
+    except Exception as e:
+        logger.error(f"Failed to remove {player} from whitelist: {e}")
+        result = f"Error: {e}"
+
+    return RedirectResponse(
+        request.url_for("admin_whitelist"),
+        status_code=status.HTTP_302_FOUND,
+    )
 
 
 class RconCommand(BaseModel):
