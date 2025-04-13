@@ -39,7 +39,9 @@ async def homepage(request: Request):
         "last_seen"
     )
 
-    player_info_map = {player.name: player for player in players_today}
+    online_usernames = status.get("player_names", [])
+    online_players = await GamePlayer.filter(name__in=online_usernames) if online_usernames else []
+
     snapshots = await ServerSnapshot.all().order_by("-timestamp").limit(1)
 
     context = {
@@ -50,9 +52,8 @@ async def homepage(request: Request):
         "server_info": server_info,
         "snapshots": snapshots,
         "players_today": players_today,
-        "player_info_map": player_info_map,
+        "online_players": online_players,
     }
-    logger.debug(f"Context for homepage: {context}")
 
     return render_template(
         "home.html",

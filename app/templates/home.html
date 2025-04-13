@@ -12,22 +12,37 @@
         <div class="mb-4">
             <h4>Igrači online</h4>
             <p>{{ players_online }} / {{ max_players }}</p>
-        
-            {% if online_names %}
-            <ul>
-                {% for name in online_names %}
-                {% set player = player_info_map.get(name) %}
-                <li>
-                    {{ name }}
-                    {% if player %}
-                    <small class="text-muted">{{ player.last_seen_coords() }}</small>
+
+            <h4 class="mt-4">Online igrači</h4>
+            {% if online_players %}
+            <ul class="list-group mb-3">
+                {% for player in online_players %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <span class="badge bg-success me-2">Online</span> {{ player.name }}
+                        {% if player.dimension %}
+                        <small class="ms-2 text-muted">({{ player.dimension }})</small>
+                        {% endif %}
+                    </span>
+                    {% if user.is_admin %}
+                    <div class="d-flex gap-2">
+                        <form method="POST" action="{{ url_for('admin_ban_player') }}">
+                            <input type="hidden" name="player" value="{{ player.name }}">
+                            <button class="btn btn-sm btn-warning" type="submit">Ban</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin_kick_player') }}">
+                            <input type="hidden" name="player" value="{{ player.name }}">
+                            <button class="btn btn-sm btn-secondary" type="submit">Kick</button>
+                        </form>
+                    </div>
                     {% endif %}
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <p>Nema igrača online</p>
+            <p class="text-muted">Nema igrača trenutno online.</p>
             {% endif %}
+                        
         </div>
     </div>
 
@@ -54,19 +69,29 @@
 
     <div class="card mb-4">
         <div class="card-body">
-        <h5 class="card-title">Igrači danas</h5>
-        {% if players_today %}
-            <ul class="list-group list-group-flush">
-            {% for p in players_today %}
-                <li class="list-group-item">
-                    {{ p.last_seen_time(format='%H:%M:%S') }}: {{ p.name }} <small class="text-muted">{{ p.last_seen_coords() }}</small>
+            {% if players_today %}
+            <ul class="list-group mb-3">
+                {% for player in players_today %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <span class="badge bg-success me-2">Online</span> {{ player.name }}
+                        {% if player.dimension %}
+                        <small class="ms-2 text-muted">({{ player.dimension }})</small>
+                        {% endif %}
+                    </span>
+                    <div class="d-flex gap-2">
+                        <form method="POST" action="{{ url_for('admin_ban_player') }}">
+                            <input type="hidden" name="player" value="{{ player.name }}">
+                            <button class="btn btn-sm btn-warning" type="submit">Ban</button>
+                        </form>
+                    </div>
                 </li>
-            {% endfor %}
+                {% endfor %}
             </ul>
-        {% else %}
-            <p>Danas nije bilo nikoga.</p>
-        {% endif %}
-        </div>
+            {% else %}
+            <p class="text-muted">Nema igrača trenutno online.</p>
+            {% endif %}
+                    </div>
     </div>
 
 
