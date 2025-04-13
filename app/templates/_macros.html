@@ -24,21 +24,21 @@
 {% endmacro %}
 
 {% macro ban_form(player, request) %}
-<form method="POST" action="{{ url_for('admin_ban_player') }}">
+<form method="POST" action="{{ url_for('admin_ban_player', request=request) }}">
   <input type="hidden" name="player" value="{{ player.name }}">
   <button class="btn btn-sm btn-warning" type="submit" onclick="return confirm('Da li si siguran da želiš da banuješ {{ player.name|escapejs }}?');">Ban</button>
 </form>
 {% endmacro %}
 
 {% macro kick_form(player, request) %}
-<form method="POST" action="{{ url_for('admin_kick_player') }}">
+<form method="POST" action="{{ url_for('admin_kick_player', request=request) }}">
   <input type="hidden" name="player" value="{{ player.name }}">
   <button class="btn btn-sm btn-secondary" type="submit" onclick="return confirm('Da li si siguran da želiš da kikuješ {{ player.name|escapejs }}?');">Kick</button>
 </form>
 {% endmacro %}
 
 {% macro remove_whitelist_form(player, request) %}
-<form method="POST" action="{{ url_for('admin_remove_whitelist') }}">
+<form method="POST" action="{{ url_for('admin_remove_whitelist', request=request) }}">
   <input type="hidden" name="player" value="{{ player.name }}">
   <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Da li si siguran da želiš da skineš {{ player.name|escapejs }} sa whiteliste?');">Skini sa whiteliste</button>
 </form>
