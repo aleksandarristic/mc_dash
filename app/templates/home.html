@@ -68,30 +68,33 @@
     </div>
 
     <div class="card mb-4">
+        <h4>Svi igrači danas</h4>
         <div class="card-body">
             {% if players_today %}
             <ul class="list-group mb-3">
                 {% for player in players_today %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span>
-                        <span class="badge bg-success me-2">Online</span> {{ player.name }}
+                        <span class="badge bg-warning me-2">Player</span> {{ player.name }}
                         {% if player.dimension %}
                         <small class="ms-2 text-muted">({{ player.dimension }})</small>
                         {% endif %}
                     </span>
+                    {% if user.is_admin %}
                     <div class="d-flex gap-2">
                         <form method="POST" action="{{ url_for('admin_ban_player') }}">
                             <input type="hidden" name="player" value="{{ player.name }}">
                             <button class="btn btn-sm btn-warning" type="submit">Ban</button>
                         </form>
                     </div>
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-muted">Nema igrača trenutno online.</p>
+            <p class="text-muted">Danas nije bilo igrača.</p>
             {% endif %}
-                    </div>
+        </div>
     </div>
 
 
