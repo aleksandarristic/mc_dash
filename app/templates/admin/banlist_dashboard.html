@@ -33,6 +33,14 @@
 <p class="text-muted">Lista je prazna.</p>
 {% endif %}
 
+<h5 class="mt-4">Banuj igrača...</h5>
+<form method="POST" action="{{ url_for('admin_ban_player') }}" class="d-flex gap-2 my-3">
+    <input id="ban-name" name="player" class="form-control" placeholder="Ime igrača" required>
+    <button class="btn btn-primary" type="submit">Banuj igrača</button>
+</form>
+
+<hr>
+
 {% if banlist and banlist['ips'] %}
 <ul id="banlist-ips" class="list-group mb-3">
     {% for line in banlist['ips'] %}
@@ -52,12 +60,13 @@
 <p class="text-muted">Lista je prazna.</p>
 {% endif %}
 
-<h5>Banuj IP adresu</h5>
+<h5 class="mt-4">Banuj IP adresu</h5>
 <form method="POST" action="{{ url_for('admin_ban_ip') }}" class="d-flex gap-2 my-3">
     <input id="ban-ip" name="ip" class="form-control" placeholder="IP adresa" required>
     <button class="btn btn-primary" type="submit">Banuj IP</button>
 </form>
 
+<hr>
 
 <h4>Banovani ID-jevi (UUID)</h4>
 {% if banlist and banlist['uuids'] %}
@@ -79,15 +88,6 @@
 <p class="text-muted">Lista je prazna.</p>
 {% endif %}
 
-<hr>
-
-<h4 class="mt-4">Banuj igrača...</h4>
-<form method="POST" action="{{ url_for('admin_ban_player') }}" class="d-flex gap-2 my-3">
-    <input id="ban-name" name="player" class="form-control" placeholder="Ime igrača" required>
-    <button class="btn btn-primary" type="submit">Banuj igrača</button>
-</form>
-
-<hr>
 
 <h4 class="mt-4">Online igrači</h4>
 {% if online_players %}
