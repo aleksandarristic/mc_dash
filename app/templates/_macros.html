@@ -38,7 +38,7 @@
 {% endmacro %}
 
 {% macro remove_whitelist_form(player, request) %}
-<form method="POST" action="{{ request.url_for('admin_remove_whitelist') }}">
+<form method="POST" action="{{ request.url_for('admin_whitelist_remove') }}">
   <input type="hidden" name="player" value="{{ player.name }}">
   <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Da li si siguran da želiš da skineš {{ player.name|escapejs }} sa whiteliste?');">Skini sa whiteliste</button>
 </form>

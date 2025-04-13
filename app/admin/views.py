@@ -466,11 +466,13 @@ async def whitelist_remove_form(request: Request, player: str = Form(...)):
     try:
         with MCRcon(RCON_HOST, RCON_PASSWORD, RCON_PORT) as rcon:
             result = rcon.command(f"whitelist remove {player}")
+        flash(request, f"Whitelist updated: {result}", "success")
     except Exception as e:
         logger.error(f"Failed to remove {player} from whitelist: {e}")
         result = f"Error: {e}"
+        flash(request, result, "error")
 
-    return RedirectResponse(
+    return redirect_back(
         request.url_for("admin_whitelist"),
         status_code=status.HTTP_302_FOUND,
     )
