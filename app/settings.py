@@ -1,4 +1,3 @@
-from pathlib import Path
 
 SERVER_IP = "your_server_ip"
 SERVER_VERSION = "your_server_version"
@@ -27,9 +26,9 @@ TORTOISE_ORM = {
     },
 }
 
+TIMEZONE = "UTC"
+
 try:
     from .settings_local import *  # noqa: F403
 except ImportError:
     pass
-
-TIMEZONE = "UTC"
