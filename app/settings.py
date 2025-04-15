@@ -31,3 +31,5 @@ try:
     from .settings_local import *  # noqa: F403
 except ImportError:
     pass
+
+TIMEZONE = "UTC"

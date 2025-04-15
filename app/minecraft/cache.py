@@ -1,11 +1,12 @@
 import asyncio
 import logging
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from mcrcon import MCRcon
 
 from app.models import GamePlayer, ServerSnapshot, User
-from app.settings import RCON_HOST, RCON_PASSWORD, RCON_PORT
+from app.settings import RCON_HOST, RCON_PASSWORD, RCON_PORT, TIMEZONE
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ _server_status_cache = {
     "players_online": 0,
     "max_players": 0,
     "player_names": [],
-    "timestamp": datetime.utcnow(),
+    "timestamp": datetime.now(ZoneInfo(TIMEZONE)),
 }
 
 
@@ -78,7 +79,7 @@ async def poll_and_cache():
                     logger.debug(f"Player found: {name}")
 
                 # ⏱️ Update last_seen timestamp
-                player.last_seen = datetime.utcnow()
+                player.last_seen = datetime.now(ZoneInfo(TIMEZONE))
                 logger.debug(f"Player {name} last seen updated.")
 
                 # 📍 Try to get position
@@ -119,7 +120,7 @@ async def poll_and_cache():
                 "players_online": players_online,
                 "max_players": max_players,
                 "player_names": player_names,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(ZoneInfo(TIMEZONE)),
             }
 
     except Exception as e:
@@ -129,7 +130,7 @@ async def poll_and_cache():
             "players_online": 0,
             "max_players": 0,
             "player_names": [],
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(ZoneInfo(TIMEZONE)),
         }
 
     _server_status_cache.update(status_data)

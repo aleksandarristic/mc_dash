@@ -43,3 +43,10 @@
   <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Da li si siguran da želiš da skineš {{ player.name|escapejs }} sa whiteliste?');">Skini sa whiteliste</button>
 </form>
 {% endmacro %}
+
+
+{% macro delete_player(player, request) %}
+<form method="post" action="{{ request.url_for('admin_delete_gameplayer', player_id=player.id) }}" onsubmit="return confirm('Da li si siguran da zaista želiš da obrišeš ovog igrača? Napomena: on NEĆE biti obrisan na serveru, već samo ovde.');">
+<button class="btn btn-sm btn-outline-danger">🗑️</button>
+</form>
+{% endmacro %}

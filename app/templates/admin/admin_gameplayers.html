@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
 {% block title %}Manage Game Players{% endblock %}
 
 {% block breadcrumbs %}
@@ -23,7 +25,6 @@
   <thead class="table-light">
     <tr>
       <th>Igrač</th>
-      <th>Korisnik</th>
       <th>Poslednji put viđen</th>
       <th>Poslednja lokacija</th>
       <th>Lokacija kuće</th>
@@ -38,15 +39,7 @@
           {{ p.name }}
         </a>
       </td>
-      <td>
-        {% if p.linked_users %}
-            {% for u in p.linked_users %}
-              <a href="{{ url_for('admin_user_list') }}?search={{ u.username }}">{{ u.username }}</a>{% if not loop.last %}, {% endif %}
-            {% endfor %}
-        {% else %}
-            —
-        {% endif %}
-            </td>
+
       <td>
         {{ p.last_seen_time() }}
       </td>
@@ -74,10 +67,11 @@
       
 
       <td>
-        <form method="post" action="{{ url_for('admin_delete_gameplayer', player_id=p.id) }}"
-              onsubmit="return confirm('Da li si siguran da zaista želiš da obrišeš ovog igrača? Napomena: on NEĆE biti obrisan na serveru, već samo ovde.');">
-          <button class="btn btn-sm btn-outline-danger">🗑️</button>
-        </form>
+
+        {{ macros.ban_form(p, request=request) }}
+        {{ macros.kick_form(p, request=request) }}
+        {{ macros.remove_whitelist_form(p, request=request) }}
+        {{ macros.delete_player(p, request=request) }}
       </td>
     </tr>
     {% endfor %}
