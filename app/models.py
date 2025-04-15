@@ -1,4 +1,5 @@
 import logging
+from zoneinfo import ZoneInfo
 
 from passlib.hash import bcrypt
 from tortoise import fields, models
@@ -106,7 +107,9 @@ class GamePlayer(models.Model):
 
     def last_seen_time(self, format: str = "%Y-%m-%d %H:%M:%S", default: str = "Nikad"):
         if self.last_seen is not None:
-            return self.last_seen.strftime(format)
+            return self.last_seen.astimezone(ZoneInfo("Europe/Belgrade")).strftime(
+                format
+            )
         return default
 
 
@@ -120,6 +123,6 @@ class ServerSnapshot(models.Model):
 
     def __str__(self):
         return f"Snapshot at {self.timestamp} - {self.status} ({self.players_online}/{self.max_players})"
-    
+
     def __repr__(self):
         return f"<ServerSnapshot: {self.timestamp} ({self.players_online}/{self.max_players})>"

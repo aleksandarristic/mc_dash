@@ -2,6 +2,7 @@ import asyncio
 import getpass
 import subprocess
 import sys
+from zoneinfo import ZoneInfo
 
 import uvicorn
 from passlib.hash import bcrypt
@@ -67,7 +68,6 @@ Utils:
         asyncio.run(Tortoise.close_connections())
     except Exception as e:
         print(f"❌ Error closing Tortoise connections: {e}")
-        
 
 
 @with_db
@@ -91,7 +91,11 @@ async def show_recent_players():
     print("-" * 60)
     for p in players:
         last_seen = (
-            p.last_seen.strftime("%Y-%m-%d %H:%M:%S") if p.last_seen else "Never"
+            p.last_seen.astimezone(ZoneInfo("Europe/Belgrade")).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            if p.last_seen
+            else "Never"
         )
         coords = (
             f"({p.last_seen_x:.1f}, {p.last_seen_y:.1f}, {p.last_seen_z:.1f})"

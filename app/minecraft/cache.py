@@ -130,7 +130,7 @@ async def poll_and_cache():
             "players_online": 0,
             "max_players": 0,
             "player_names": [],
-            "timestamp": datetime.now(ZoneInfo(TIMEZONE)),
+            "de": datetime.now(ZoneInfo(TIMEZONE)),
         }
 
     _server_status_cache.update(status_data)
